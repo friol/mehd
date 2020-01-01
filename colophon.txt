@@ -1,0 +1,13 @@
+mehd <strikethrough>old</strikethrough> next gen editor
+
+* numero di colonne configurabile
+* scrollbar laterale destra in pixel art
+* scolling old-school a righe intere
+* selezione testo con mouse
+* selezione 1-word con doppio click
+* copia/incolla
+* word wrap quando il testo raggiunge il margine destro
+* combinazioni di comandi da tastiera (espandere)
+* word count
+* char count
+* status bar below - cursor position row/column
