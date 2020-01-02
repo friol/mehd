@@ -15,7 +15,7 @@ class fontmgr
         this.numLettersY=6;
     }
 
-    drawCursor(cx,cy,ctick,csteps)
+    drawCursor(cx,cy,ctick,csteps,inverted)
     {
         var alpha;
         if (ctick<(csteps/2))
@@ -26,8 +26,8 @@ class fontmgr
         {
             alpha=1-((ctick-(csteps/2))/(csteps/2));
         }
-        
-        this.drawChar(cx,cy,String.fromCharCode(127),alpha,false);
+
+        this.drawChar(cx,cy,String.fromCharCode(127),alpha,inverted);
     }
 
     drawChar(px,py,ch,chalpha,chreverse)

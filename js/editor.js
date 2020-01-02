@@ -23,12 +23,40 @@ class editor
         
         this.docTopline=0;
         
-        this.numColumns=80;
+        this.numColumns=50;
         this.numRows=22;
 
-        this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager);
+        this.editorMode=0; // 0 - inserting text, 1 - command mode
+
+        // resize canvas basing on columns/rows width
+
+        var cnvsWidth=(this.numColumns*this.fontManager.fontwidth)+(this.numColumns*this.fontManager.multiplier);
+
+        document.getElementById(this.cnvsid).width=cnvsWidth;
+
+
+        this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numColumns);
 
         window.addEventListener('keydown', this.handleKeyPress.bind(this));
+        window.addEventListener('dblclick', this.doubleClick.bind(this));
+    }
+
+    doubleClick(e)
+    {
+    }
+
+    handleCommand(cmd)
+    {
+        if (cmd=="test")
+        {
+            this.lineArray=[];
+            this.lineArray.push("Some sample of text.");
+            this.lineArray.push("The quick brown palomb jumped over.");
+            this.lineArray.push("<=ASCII-art=>");
+            this.lineArray.push("");
+            this.cursorx=0;
+            this.cursory=3;
+        }
     }
 
     handleKeyPress(e)
@@ -36,52 +64,104 @@ class editor
         if (e.keyCode==8)
         {
             // backspace
-            this.backSpace();
+            if (this.editorMode==0)
+            {
+                this.backSpace();
+            }
+            else
+            {
+                this.statusBar.backSpace();
+            }
         }
         else if (e.keyCode==13)
         {
             // return
-            this.cursory++;
-            this.cursorx=0;
-            this.lineArray.push("");
+            if (this.editorMode==0)
+            {
+                this.cursory++;
+                this.cursorx=0;
+                this.lineArray.push("");
+            }
+            else
+            {
+                // process command
+                var curCmd=this.statusBar.currentCommand;
+                this.handleCommand(curCmd);
+
+                // and go back to editor mode 0
+                this.statusBar.resetCommand();
+                this.statusBar.mode=0;
+                this.editorMode=0;
+            }
+        }
+        else if (e.keyCode==27)
+        {
+            // esc triggers command mode and back
+            if (this.editorMode==0) 
+            {
+                this.editorMode=1;
+                this.statusBar.setMode(1);
+            }
+            else
+            {
+                this.editorMode=0;
+                this.statusBar.setMode(0);
+            }
         }
         else if (e.keyCode==38)
         {
-            // up
-            if (this.cursory==0) return;
-            this.cursory--;
-        }
-        else if ((e.keyCode>='A'.charCodeAt(0))&&(e.keyCode<='z'.charCodeAt(0)))
-        {
-            var kc=e.keyCode;
-            if (!e.shiftKey) kc+=32;
-            this.addChar(String.fromCharCode(kc));
-            return false;
-        }
-        else if ((e.keyCode>=48)&&(e.keyCode<=57)&&(!e.shiftKey))
-        {
-            var kc=e.keyCode;
-            this.addChar(String.fromCharCode(kc));
-            return false;
+            // arrow up
+            if (this.editorMode==0)
+            {
+                if (this.cursory==0) return;
+                this.cursory--;
+            }
         }
         else
         {
-            // try to remap the keycode
-            for (var m=0;m<this.keypressRemap.length;m++)
+            var charToAdd="";
+            if ((e.keyCode>='A'.charCodeAt(0))&&(e.keyCode<='z'.charCodeAt(0)))
             {
-                if (this.keypressRemap[m][0]==e.keyCode)
+                var kc=e.keyCode;
+                if (!e.shiftKey) kc+=32;
+                charToAdd=String.fromCharCode(kc);
+            }
+            else if ((e.keyCode>=48)&&(e.keyCode<=57)&&(!e.shiftKey))
+            {
+                var kc=e.keyCode;
+                charToAdd=String.fromCharCode(kc);
+            }
+            else
+            {
+                // try to remap the keycode
+                for (var m=0;m<this.keypressRemap.length;m++)
                 {
-                    if (e.shiftKey)
+                    if (this.keypressRemap[m][0]==e.keyCode)
                     {
-                        this.addChar(this.keypressRemap[m][2]);
+                        if (e.shiftKey)
+                        {
+                            charToAdd=this.keypressRemap[m][2];
+                        }
+                        else
+                        {
+                            charToAdd=this.keypressRemap[m][1];
+                        }
                     }
-                    else
-                    {
-                        this.addChar(this.keypressRemap[m][1]);
-                    }
-
-                    return false;
                 }
+            }
+
+            if (charToAdd!="")
+            {
+                if (this.editorMode==0)
+                {
+                    this.addChar(charToAdd);
+                }
+                else
+                {
+                    this.statusBar.addChar(charToAdd);
+                }
+
+                return false;
             }
         }
 
@@ -133,7 +213,7 @@ class editor
 
     drawCursor()
     {
-        this.fontManager.drawCursor(this.cursorx,this.cursory,this.cursorTick,this.cursorSteps);
+        this.fontManager.drawCursor(this.cursorx,this.cursory,this.cursorTick,this.cursorSteps,false);
     }
 
     update()
@@ -144,7 +224,7 @@ class editor
             this.cursorTick=0;
         }
 
-        this.statusBar.updateCursorPos(this.cursory,this.cursorx);
+        this.statusBar.updateCursor(this.cursory,this.cursorx,this.cursorTick,this.cursorSteps);
     }
 
     draw()
@@ -169,8 +249,11 @@ class editor
             row++;
         }
 
-        // draw cursor
-        this.drawCursor();
+        if (this.editorMode==0)
+        {
+            // draw cursor in editing space
+            this.drawCursor();
+        }
 
         // draw status bar
         this.statusBar.draw();
