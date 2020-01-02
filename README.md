@@ -1,4 +1,4 @@
 # mehd
 
-The old/next generation editor.
+The <strike>old</strike> next generation editor.
 
