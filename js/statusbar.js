@@ -9,16 +9,26 @@ class statusbar
         this.cursorCol=col;
         this.statusLine=statusLine;
         this.fontManager=fontmgr;
-        this.mode=0; // 0 - statusbar, 1 - command bar
+        this.mode=0; // 0 - statusbar, 1 - command bar, 2 - command result mode
         this.videocolumns=totcols;
 
         this.currentCommand="";
         this.cursorPosx=1;
+
+        this.outputMsg="";
+        this.mode2tick=0;
+        this.mode2numTicks=60*1;
     }
 
     setMode(m)
     {
         this.mode=m;
+    }
+
+    setOutputMessage(m)
+    {
+        this.outputMsg=m;
+        this.mode2tick=0;
     }
 
     backSpace()
@@ -50,6 +60,19 @@ class statusbar
         this.cursorSteps=steps;
     }
 
+    update()
+    {
+        if (this.mode==2)
+        {
+            this.mode2tick++;
+            if (this.mode2tick>=this.mode2numTicks)
+            {
+                this.mode2tick=0;
+                this.mode=0;
+            }
+        }
+    }
+
     draw()
     {
         if (this.mode==0)
@@ -68,10 +91,9 @@ class statusbar
                 this.fontManager.drawChar(c,this.statusLine,str.charAt(c),1,true);
             }
         }
-        else
+        else if (this.mode==1)
         {
             var str=":"+this.currentCommand;
-
             var ln=str.length;
 
             var paddingLen=this.videocolumns-ln;
@@ -86,6 +108,23 @@ class statusbar
             }
 
             this.fontManager.drawCursor(this.cursorPosx,this.statusLine,this.cursorTick,this.cursorSteps,true);
+        }
+        else
+        {
+            // output mode
+            var str=this.outputMsg;
+            var ln=str.length;
+
+            var paddingLen=this.videocolumns-ln;
+            for (var s=0;s<paddingLen;s++)
+            {
+                str+=" ";
+            }
+
+            for (var c=0;c<str.length;c++)
+            {
+                this.fontManager.drawChar(c,this.statusLine,str.charAt(c),1,true);
+            }
         }
     }
 }

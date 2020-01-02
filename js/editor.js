@@ -56,6 +56,7 @@ class editor
             this.lineArray.push("");
             this.cursorx=0;
             this.cursory=3;
+            return "Sample text uploaded."
         }
     }
 
@@ -67,10 +68,14 @@ class editor
             if (this.editorMode==0)
             {
                 this.backSpace();
+                e.preventDefault();
+                return false;
             }
             else
             {
                 this.statusBar.backSpace();
+                e.preventDefault();
+                return false;
             }
         }
         else if (e.keyCode==13)
@@ -86,11 +91,12 @@ class editor
             {
                 // process command
                 var curCmd=this.statusBar.currentCommand;
-                this.handleCommand(curCmd);
+                var retMsg=this.handleCommand(curCmd);
 
                 // and go back to editor mode 0
                 this.statusBar.resetCommand();
-                this.statusBar.mode=0;
+                this.statusBar.setOutputMessage(retMsg);
+                this.statusBar.mode=2;
                 this.editorMode=0;
             }
         }
@@ -225,6 +231,7 @@ class editor
         }
 
         this.statusBar.updateCursor(this.cursory,this.cursorx,this.cursorTick,this.cursorSteps);
+        this.statusBar.update();
     }
 
     draw()

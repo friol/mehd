@@ -9,7 +9,6 @@ function drawPhun()
     window.requestAnimationFrame(drawPhun);
 }
 
-
 window.onload=function()
 {
     glbEditor=new editor("maincanvas");
