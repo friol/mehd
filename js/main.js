@@ -11,7 +11,10 @@ function drawPhun()
 
 window.onload=function()
 {
-    var mehdVersion="0.4";
+    var mehdVersion="0.5";
+    document.title="mehd v"+mehdVersion+" - the text editor of the next decade";
+    document.getElementById("versionSpan").innerHTML="mehd v"+mehdVersion;
+    
     glbEditor=new editor("maincanvas",mehdVersion);
     drawPhun();
 }
