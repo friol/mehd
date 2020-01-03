@@ -1,6 +1,7 @@
 mehd <strikethrough>old</strikethrough> next gen editor
 
-* numero di colonne configurabile
+TODO
+
 * scrollbar laterale destra in pixel art
 * scolling old-school a righe intere
 * selezione testo con mouse
@@ -8,6 +9,11 @@ mehd <strikethrough>old</strikethrough> next gen editor
 * copia/incolla
 * word wrap quando il testo raggiunge il margine destro
 * combinazioni di comandi da tastiera (espandere)
+* performance problems with getImageData for statusbar/reverse
+
+DONE
+
+* "configurable" number of columns (via code)
+* status bar below - cursor position row/column
 * word count
 * char count
-* status bar below - cursor position row/column

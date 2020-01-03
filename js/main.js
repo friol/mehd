@@ -11,6 +11,7 @@ function drawPhun()
 
 window.onload=function()
 {
-    glbEditor=new editor("maincanvas");
+    var mehdVersion="0.4";
+    glbEditor=new editor("maincanvas",mehdVersion);
     drawPhun();
 }

@@ -2,7 +2,7 @@
 
 class editor
 {
-    constructor(cnvsid)
+    constructor(cnvsid,edversion)
     {
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
             [188,',',';'],[187,'+','*'],[220,'\\','|'],[189,'-','_'],
@@ -12,6 +12,7 @@ class editor
         ];
 
         this.cnvsid=cnvsid;
+        this.edVersion=edversion;
         this.fontManager=new fontmgr(cnvsid);
 
         this.lineArray=[];
@@ -45,19 +46,103 @@ class editor
     {
     }
 
+    countWords()
+    {
+        var wc=0;
+        var charsToRemove=[',',';','.',':','=','<','>'];
+
+        for (var l=0;l<this.lineArray.length;l++)
+        {
+            var str=this.lineArray[l];
+            for (var c of charsToRemove)
+            {
+                str=str.replace(c,'');
+            }
+
+            var arr=str.split(' ');
+            for (var c=0;c<arr.length;c++)
+            {
+                if (arr[c].length>0) wc+=1;
+            }
+        }
+
+        return wc;
+    }
+
+    download(filename, text) 
+    {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    countChars()
+    {
+        var cc=0;
+        this.lineArray.forEach(element => { for (const c of element) { cc++; } });
+        return cc;
+    }
+
     handleCommand(cmd)
     {
         if (cmd=="test")
         {
             this.lineArray=[];
-            this.lineArray.push("Some sample of text.");
-            this.lineArray.push("The quick brown palomb jumped over.");
-            this.lineArray.push("<=ASCII-art=>");
+            this.lineArray.push("A sample of text.");
+            this.lineArray.push("The quick brown palomb jumped over the lazy tlc.");
+            this.lineArray.push("<=ASCII-arte=>");
             this.lineArray.push("");
             this.cursorx=0;
             this.cursory=3;
             return "Sample text uploaded."
         }
+        else if (cmd=="wc")
+        {
+            // wordcount
+            var wc=0;
+            wc=this.countWords();
+            return "Word count: "+wc.toString();
+        }
+        else if (cmd=="cc")
+        {
+            // char count
+            var cc=0;
+            cc=this.countChars();
+            return "Char count: "+cc.toString();
+        }
+        else if ((cmd=="save")||(cmd=="s"))
+        {
+            // downloads the text in a .txt file
+            var text="";
+            this.lineArray.forEach(element => text+=element+'\n');
+            this.download("mehd.txt",text);
+            return "File saved.";
+        }
+        else if ((cmd=="clear")||(cmd=="cls"))
+        {
+            // wipes out your text
+            this.lineArray=[];
+            this.cursorx=0;
+            this.cursory=0;
+            return "Text wiped out.";
+        }
+        else if (cmd=="ver")
+        {
+            return "Mehd version "+this.edVersion;
+        }
+        else
+        {
+            return "Unknown command";
+        }
+
+        return ""; // no cmd
     }
 
     handleKeyPress(e)
@@ -80,7 +165,7 @@ class editor
         }
         else if (e.keyCode==13)
         {
-            // return
+            // carriage return
             if (this.editorMode==0)
             {
                 this.cursory++;
@@ -126,7 +211,7 @@ class editor
         else
         {
             var charToAdd="";
-            if ((e.keyCode>='A'.charCodeAt(0))&&(e.keyCode<='z'.charCodeAt(0)))
+            if ((e.keyCode>='A'.charCodeAt(0))&&(e.keyCode<='Z'.charCodeAt(0)))
             {
                 var kc=e.keyCode;
                 if (!e.shiftKey) kc+=32;
@@ -198,6 +283,21 @@ class editor
         }
     }
 
+    rearrangeLines(curpos)
+    {
+        var curline=this.lineArray[curpos];
+        var lastSpacePos=curline.lastIndexOf(" ");
+        var newCurLine=curline.substring(0,lastSpacePos);
+        var lastWord=curline.substring(lastSpacePos+1);
+        this.lineArray[curpos]=newCurLine;
+
+        if (this.lineArray.length==(curpos+1))
+        {
+            this.lineArray.push(lastWord);
+            this.cursorx=lastWord.length;
+        }
+    }
+
     addChar(ch)
     {
         if (this.lineArray.length==0)
@@ -206,7 +306,16 @@ class editor
         }
 
         this.lineArray[this.docTopline+this.cursory]+=ch;
-        this.cursorx++;
+
+        if (this.lineArray[this.docTopline+this.cursory].length==this.numColumns)
+        {
+            this.rearrangeLines(this.docTopline+this.cursory);
+            this.cursory+=1;
+        }
+        else
+        {
+            this.cursorx++;
+        }
     }
 
     drawLine(l,row)
