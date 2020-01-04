@@ -1,15 +1,13 @@
+
 mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* mouse selection
 * scrollbar laterale destra in pixel art
-* scolling old-school a righe intere
-* selezione testo con mouse
-* selezione 1-word con doppio click
-* copia/incolla
-* word wrap quando il testo raggiunge il margine destro
-* combinazioni di comandi da tastiera (espandere)
-* performance problems with getImageData for statusbar/reverse
+* scolling old-school (whole lines)
+* word wrap with text on the next line
+* keyboard "chords" commands
 
 DONE
 
@@ -17,3 +15,7 @@ DONE
 * status bar below - cursor position row/column
 * word count
 * char count
+* performance problems with getImageData for statusbar/reverse
+* fps counter
+* 1-word selection with doubleclick
+* copy/paste

@@ -24,10 +24,12 @@ class editor
         
         this.docTopline=0;
         
-        this.numColumns=50;
+        this.numColumns=60;
         this.numRows=22;
 
         this.editorMode=0; // 0 - inserting text, 1 - command mode
+
+        this.copyBuffer="";
 
         // resize canvas basing on columns/rows width
 
@@ -37,13 +39,98 @@ class editor
 
 
         this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numColumns);
+        this.selection=new selection(cnvsid,this.numColumns,this.fontManager);
+
+        // event handlers
 
         window.addEventListener('keydown', this.handleKeyPress.bind(this));
         window.addEventListener('dblclick', this.doubleClick.bind(this));
+        window.addEventListener('click', this.onclick.bind(this));
+    }
+
+    onclick(e)
+    {
+        this.selection.active=false;
     }
 
     doubleClick(e)
     {
+        // find word in that point and highlight it
+        var x=e.pageX;
+        var y=e.pageY;
+        x-=document.getElementById(this.cnvsid).offsetLeft;
+        y-=document.getElementById(this.cnvsid).offsetTop;
+
+        var charCoord=this.fontManager.getCharCoord(x,y);
+
+        this.highlightFromChar(charCoord);
+    }
+
+    isLetterOrNumber(str) 
+    {
+        return str.length === 1 && str.match(/[a-z0-9]/i);
+    }    
+
+    highlightWord(x,l)
+    {
+        var str=this.lineArray[l];
+        var rightex,leftex;
+
+        // find right/left extremes
+        var xpos=x;
+        var found=false;
+        while (!found)
+        {
+            if ((xpos<str.length) && (this.isLetterOrNumber(str[xpos])))
+            {
+                xpos+=1;
+            }
+            else
+            {
+                found=true;
+            }
+        }
+        rightex=xpos;
+        if (rightex!=0) rightex-=1;
+
+        xpos=x;
+        found=false;
+        while (!found)
+        {
+            if ((xpos>0) && (this.isLetterOrNumber(str[xpos])))
+            {
+                xpos-=1;
+            }
+            else
+            {
+                found=true;
+            }
+        }
+        leftex=xpos;
+        if (leftex!=0) leftex+=1;
+
+        this.selection.active=true;
+        this.selection.origx=leftex;
+        this.selection.endx=rightex;
+        this.selection.origline=l;
+        this.selection.endline=l;
+    }
+
+    highlightFromChar(ccoord)
+    {
+        var line=ccoord[1];
+        if (line>=this.lineArray.length)        
+        {
+            return;
+        }
+
+        var xpos=ccoord[0];
+        if (xpos>=this.lineArray[line].length)
+        {
+            return;
+        }
+
+        this.highlightWord(xpos,line);
     }
 
     countWords()
@@ -97,7 +184,7 @@ class editor
             this.lineArray=[];
             this.lineArray.push("A sample of text.");
             this.lineArray.push("The quick brown palomb jumped over the lazy tlc.");
-            this.lineArray.push("<=ASCII-arte=>");
+            this.lineArray.push("<=ASCII-art=>");
             this.lineArray.push("");
             this.cursorx=0;
             this.cursory=3;
@@ -143,6 +230,57 @@ class editor
         }
 
         return ""; // no cmd
+    }
+
+    copyCurrentSelection()
+    {
+        if (this.selection.active)
+        {
+            var copiedText="";
+            var curx=this.selection.origx;
+            var cury=this.selection.origline;
+
+            var finished=false;
+            while (!finished)
+            {
+                copiedText+=this.lineArray[cury][curx];
+                curx++;
+
+                if ((curx>this.selection.endx)&&(cury==this.selection.endline))
+                {
+                    finished=true;
+                }
+                else
+                {
+                    if (curx>=this.numColumns)
+                    {
+                        curx=0;
+                        cury+=1;
+                    }                
+                }
+            }
+
+            this.copyBuffer=copiedText;
+            this.statusBar.setStatus("Copied string '"+this.copyBuffer+"'");
+        }    
+    }
+
+    handleCharCombo(code)
+    {
+        if (code==67) // CTRL-C
+        {
+            // copy (eventually) selected text
+            this.copyCurrentSelection();                
+        }
+        else if (code==86) // CTRL-V
+        {
+            // paste what's in copybuffer
+            if (this.copyBuffer!="")
+            {
+                this.lineArray[this.docTopline+this.cursory]+=this.copyBuffer;
+                this.cursorx+=this.copyBuffer.length;                
+            }
+        }
     }
 
     handleKeyPress(e)
@@ -213,9 +351,17 @@ class editor
             var charToAdd="";
             if ((e.keyCode>='A'.charCodeAt(0))&&(e.keyCode<='Z'.charCodeAt(0)))
             {
-                var kc=e.keyCode;
-                if (!e.shiftKey) kc+=32;
-                charToAdd=String.fromCharCode(kc);
+                if (e.ctrlKey)
+                {
+                    // handle special combinations (like ctrl-c, ctrl-v, etc.)
+                    this.handleCharCombo(e.keyCode);
+                }
+                else
+                {
+                    var kc=e.keyCode;
+                    if (!e.shiftKey) kc+=32;
+                    charToAdd=String.fromCharCode(kc);
+                }
             }
             else if ((e.keyCode>=48)&&(e.keyCode<=57)&&(!e.shiftKey))
             {
@@ -351,6 +497,9 @@ class editor
         const context = canvas.getContext('2d');
         context.fillStyle = "#19432B";
         context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // draw eventual selection
+        this.selection.draw();
 
         // draw lines of text
 

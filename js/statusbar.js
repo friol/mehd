@@ -17,7 +17,7 @@ class statusbar
 
         this.outputMsg="";
         this.mode2tick=0;
-        this.mode2numTicks=60*1;
+        this.mode2numTicks=60*2;
     }
 
     setMode(m)
@@ -28,6 +28,13 @@ class statusbar
     setOutputMessage(m)
     {
         this.outputMsg=m;
+        this.mode2tick=0;
+    }
+
+    setStatus(msg)
+    {
+        this.mode=2;
+        this.outputMsg=msg;
         this.mode2tick=0;
     }
 

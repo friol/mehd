@@ -39,7 +39,7 @@ class fontmgr
 
             for (var p=0;p<data1.length;p+=4)
             {
-                data1[p+0]=131; data1[p+1]=255; data1[p+2]=199; data1[p+3]=255;
+                data1[p+0]=0; data1[p+1]=0; data1[p+2]=0; data1[p+3]=0;
             }
             ctx.putImageData(idt1,0,0);
 
@@ -47,7 +47,7 @@ class fontmgr
                             this.fontwidth,this.fontheight,
                             0,0,
                             this.fontwidth,this.fontheight);
-            var idt = ctx.getImageData(0,0,cvs.width-this.multiplier,cvs.height-this.multiplier);
+            var idt = ctx.getImageData(0,0,cvs.width,cvs.height);
             var data = idt.data;
 
             for (var p=0;p<data.length;p+=4)
@@ -55,8 +55,9 @@ class fontmgr
                 var r=data[p+0];
                 var g=data[p+1];
                 var b=data[p+2];
+                var a=data[p+3];
 
-                if ((r==25)&&(g==67)&&(b==43))
+                if (a==0)
                 {
                     data[p+0]=131; data[p+1]=255; data[p+2]=199; data[p+3]=255;
                 }
@@ -69,6 +70,35 @@ class fontmgr
             ctx.putImageData(idt,0,0);
             this.reverseCanvasArray.push(cvs);
         }
+    }
+
+    getCharCoord(x,y)
+    {
+        //alert(x+" "+y);
+        var charx=Math.floor(x/(this.fontwidth+this.multiplier));
+        var chary=Math.floor(y/(this.fontheight));
+
+        return [charx,chary];        
+    }
+
+    drawSelectionQuad(x,y)
+    {
+        const canvas=document.getElementById(this.cnvsid);
+        const context = canvas.getContext('2d');
+
+        var origPx=x;
+
+        x*=this.fontwidth;
+        y*=this.fontheight;
+
+        // x letter spacing
+        x+=(this.lettersShiftX/2)*origPx;
+
+        // inner margin
+        x+=1;
+
+        context.fillStyle="#b0b0c0";
+        context.fillRect(x,y,this.fontwidth+this.multiplier,this.fontheight);
     }
 
     drawCursor(cx,cy,ctick,csteps,inverted)
