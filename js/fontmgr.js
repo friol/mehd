@@ -97,7 +97,7 @@ class fontmgr
         // inner margin
         x+=1;
 
-        context.fillStyle="#b0b0c0";
+        context.fillStyle="#3d9ab3";
         context.fillRect(x,y,this.fontwidth+this.multiplier,this.fontheight);
     }
 

@@ -30,6 +30,11 @@ class editor
         this.editorMode=0; // 0 - inserting text, 1 - command mode
 
         this.copyBuffer="";
+        this.dragging=false;
+        this.dragstartx=0;
+        this.dragstarty=0;
+        this.dragendx=0;
+        this.dragendy=0;
 
         // resize canvas basing on columns/rows width
 
@@ -39,18 +44,90 @@ class editor
 
 
         this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numColumns);
-        this.selection=new selection(cnvsid,this.numColumns,this.fontManager);
+        this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
 
         // event handlers
 
         window.addEventListener('keydown', this.handleKeyPress.bind(this));
         window.addEventListener('dblclick', this.doubleClick.bind(this));
-        window.addEventListener('click', this.onclick.bind(this));
+        window.addEventListener('mousedown', this.onmousedown.bind(this));
+        window.addEventListener('mouseup', this.onmouseup.bind(this));
+        window.addEventListener('mousemove', this.onmousemove.bind(this));
     }
 
-    onclick(e)
+    onmousedown(e)
     {
         this.selection.active=false;
+
+        var x=e.pageX;
+        var y=e.pageY;
+        x-=document.getElementById(this.cnvsid).offsetLeft;
+        y-=document.getElementById(this.cnvsid).offsetTop;
+
+        var charCoord=this.fontManager.getCharCoord(x,y);
+
+        this.dragging=true;
+        this.dragstartx=charCoord[0];
+        this.dragstarty=charCoord[1];
+
+        if (this.dragstarty<this.lineArray.length)
+        {
+            if (this.dragstartx>this.lineArray[this.dragstarty].length)
+            {
+                this.dragstartx=this.lineArray[this.dragstarty].length-1;
+            }
+        }
+    }
+
+    onmouseup(e)
+    {
+        this.dragging=false;
+    }
+
+    onmousemove(e)
+    {
+        if (this.dragging)
+        {
+            var x=e.pageX;
+            var y=e.pageY;
+            x-=document.getElementById(this.cnvsid).offsetLeft;
+            y-=document.getElementById(this.cnvsid).offsetTop;
+    
+            var charCoord=this.fontManager.getCharCoord(x,y);
+
+            if (
+                    ((charCoord[0]>this.dragstartx)&&(charCoord[1]>=this.dragstarty)) ||
+                    ((charCoord[0]<this.dragstartx)&&(charCoord[1]>this.dragstarty))
+            )
+            {
+                if (charCoord[1]<=this.lineArray.length)
+                {
+                    if (charCoord[0]>=this.lineArray[charCoord[1]].length)
+                    {
+                        charCoord[0]=this.lineArray[charCoord[1]].length-1;
+                    }
+
+                    this.selection.active=true;
+                    this.selection.set(this.dragstartx,this.dragstarty,charCoord[0],charCoord[1]);
+                }
+            }
+            else if (
+                    ((charCoord[0]<this.dragstartx)&&(charCoord[1]<=this.dragstarty)) ||
+                    ((charCoord[0]>this.dragstartx)&&(charCoord[1]<this.dragstarty))
+            )
+            {
+                if (charCoord[1]<=this.lineArray.length)
+                {
+                    if (charCoord[0]>=this.lineArray[charCoord[1]].length)
+                    {
+                        charCoord[0]=this.lineArray[charCoord[1]].length-1;
+                    }
+
+                    this.selection.active=true;
+                    this.selection.set(charCoord[0],charCoord[1],this.dragstartx,this.dragstarty);
+                }
+            }
+        }
     }
 
     doubleClick(e)
@@ -168,6 +245,8 @@ class editor
         element.click();
 
         document.body.removeChild(element);
+
+        this.statusBar.setStatus("File downloaded.");
     }
 
     countChars()
@@ -220,7 +299,7 @@ class editor
             this.cursory=0;
             return "Text wiped out.";
         }
-        else if (cmd=="ver")
+        else if ((cmd=="ver")||(cmd=="v"))
         {
             return "Mehd version "+this.edVersion;
         }
@@ -261,7 +340,12 @@ class editor
             }
 
             this.copyBuffer=copiedText;
-            this.statusBar.setStatus("Copied string '"+this.copyBuffer+"'");
+            var summary=this.copyBuffer;
+            if (summary.length>20)
+            {
+                summary=summary.substr(0,20)+"...";
+            }
+            this.statusBar.setStatus("Copied string '"+summary+"'");
         }    
     }
 
@@ -288,6 +372,8 @@ class editor
         if (e.keyCode==8)
         {
             // backspace
+            this.selection.active=false;
+
             if (this.editorMode==0)
             {
                 this.backSpace();
@@ -304,6 +390,8 @@ class editor
         else if (e.keyCode==13)
         {
             // carriage return
+            this.selection.active=false;
+
             if (this.editorMode==0)
             {
                 this.cursory++;
@@ -326,6 +414,8 @@ class editor
         else if (e.keyCode==27)
         {
             // esc triggers command mode and back
+            this.selection.active=false;
+
             if (this.editorMode==0) 
             {
                 this.editorMode=1;
@@ -339,6 +429,7 @@ class editor
         }
         else if (e.keyCode==38)
         {
+            // todo: arrows
             // arrow up
             if (this.editorMode==0)
             {
@@ -361,12 +452,14 @@ class editor
                     var kc=e.keyCode;
                     if (!e.shiftKey) kc+=32;
                     charToAdd=String.fromCharCode(kc);
+                    this.selection.active=false;
                 }
             }
             else if ((e.keyCode>=48)&&(e.keyCode<=57)&&(!e.shiftKey))
             {
                 var kc=e.keyCode;
                 charToAdd=String.fromCharCode(kc);
+                this.selection.active=false;
             }
             else
             {
@@ -392,10 +485,12 @@ class editor
                 if (this.editorMode==0)
                 {
                     this.addChar(charToAdd);
+                    this.selection.active=false;
                 }
                 else
                 {
                     this.statusBar.addChar(charToAdd);
+                    this.selection.active=false;
                 }
 
                 return false;
@@ -499,6 +594,7 @@ class editor
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw eventual selection
+        this.selection.update(this.lineArray);
         this.selection.draw();
 
         // draw lines of text
