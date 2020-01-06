@@ -7,7 +7,7 @@ class statusbar
         this.cnvsid=cnvsid;
         this.cursorRow=row;
         this.cursorCol=col;
-        this.statusLine=statusLine;
+        this.statusLine=statusLine-1;
         this.fontManager=fontmgr;
         this.mode=0; // 0 - statusbar, 1 - command bar, 2 - command result mode
         this.videocolumns=totcols;
@@ -118,7 +118,7 @@ class statusbar
         }
         else
         {
-            // output mode
+            // output mode (2)
             var str=this.outputMsg;
             var ln=str.length;
 

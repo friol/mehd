@@ -35,7 +35,7 @@ function drawPhun()
 
 window.onload=function()
 {
-    var mehdVersion="0.6";
+    var mehdVersion="0.7";
     document.title="mehd v"+mehdVersion+" - the text editor of the next decade";
     document.getElementById("versionSpan").innerHTML="mehd v"+mehdVersion;
     

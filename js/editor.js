@@ -24,7 +24,8 @@ class editor
         
         this.docTopline=0;
         
-        this.numColumns=60;
+        this.numTotColumns=60;
+        this.numColumns=this.numTotColumns-2;
         this.numRows=22;
 
         this.editorMode=0; // 0 - inserting text, 1 - command mode
@@ -38,13 +39,18 @@ class editor
 
         // resize canvas basing on columns/rows width
 
-        var cnvsWidth=(this.numColumns*this.fontManager.fontwidth)+(this.numColumns*this.fontManager.multiplier);
+        var cnvsWidth=(this.numTotColumns*this.fontManager.fontwidth)+(this.numTotColumns*this.fontManager.multiplier)+2;
+        var cnvsHeight=this.numRows*this.fontManager.fontheight+6;
 
         document.getElementById(this.cnvsid).width=cnvsWidth;
+        document.getElementById(this.cnvsid).height=cnvsHeight;
 
+        // init some object that will be usefull later
 
-        this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numColumns);
+        this.scrollBar=new scrollbar(cnvsid,"arrowUp","arrowDown",this.fontManager.multiplier,this.fontManager.fontheight);
+        this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numTotColumns);
         this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
+        this.undoManager=new undomgr();
 
         // event handlers
 
@@ -331,8 +337,9 @@ class editor
                 }
                 else
                 {
-                    if (curx>=this.numColumns)
+                    if (curx>=this.lineArray[cury].length)
                     {
+                        copiedText+="\n";
                         curx=0;
                         cury+=1;
                     }                
@@ -345,8 +352,49 @@ class editor
             {
                 summary=summary.substr(0,20)+"...";
             }
+
             this.statusBar.setStatus("Copied string '"+summary+"'");
         }    
+    }
+
+    cutCurrentSelection()
+    {
+        if (this.selection.active)
+        {
+            if (this.selection.origline==this.selection.endline)
+            {
+                var str=this.lineArray[this.selection.origline];
+                var pre=str.substring(0,this.selection.origx);
+                var post=str.substring(this.selection.endx+1);
+                this.lineArray[this.selection.origline]=pre+post;
+            }            
+            else
+            {
+                var newLineArray=[];
+                for (var l=0;l<this.lineArray.length;l++)
+                {
+                    if (l<this.selection.origline)
+                    {
+                        newLineArray.push(this.lineArray[l]);
+                    }
+                    else if (l==this.selection.origline)
+                    {
+                        newLineArray.push(this.lineArray[l].substring(0,this.selection.origx)+this.lineArray[this.selection.endline].substring(this.selection.endx+1));
+                    }
+                    else if (l>this.selection.endline)
+                    {
+                        newLineArray.push(this.lineArray[l]);
+                    }
+                }                
+
+                this.lineArray=[];
+                newLineArray.forEach(element => {
+                    this.lineArray.push(element);
+                });
+            }
+
+            this.selection.active=false;
+        }        
     }
 
     handleCharCombo(code)
@@ -365,6 +413,17 @@ class editor
                 this.cursorx+=this.copyBuffer.length;                
             }
         }
+        else if (code==88) // CTRL-X
+        {
+            // cut
+            this.copyCurrentSelection();
+            this.cutCurrentSelection();
+        }
+        else if (code==90) // CTRL-Z
+        {
+            // undo
+            this.undoManager.undoLastAction(this);
+        }
     }
 
     handleKeyPress(e)
@@ -376,7 +435,11 @@ class editor
 
             if (this.editorMode==0)
             {
-                this.backSpace();
+                var ch=this.backSpace();
+                if (ch!="")
+                {
+                    this.undoManager.backspace(ch,this);
+                }
                 e.preventDefault();
                 return false;
             }
@@ -395,8 +458,14 @@ class editor
             if (this.editorMode==0)
             {
                 this.cursory++;
+                if (this.cursory==(this.numRows-1))
+                {
+                    this.cursory--;
+                    this.docTopline+=1;
+                }
                 this.cursorx=0;
                 this.lineArray.push("");
+                this.undoManager.carriageReturn(this);
             }
             else
             {
@@ -433,8 +502,17 @@ class editor
             // arrow up
             if (this.editorMode==0)
             {
-                if (this.cursory==0) return;
-                this.cursory--;
+                if (this.cursory==0)
+                {
+                    if (this.docTopline>0)
+                    {
+                        this.docTopline--;
+                    }
+                }
+                else
+                {
+                    this.cursory--;
+                }
             }
         }
         else
@@ -485,6 +563,7 @@ class editor
                 if (this.editorMode==0)
                 {
                     this.addChar(charToAdd);
+                    this.undoManager.addChar(this.cursorx-1,this.cursory);
                     this.selection.active=false;
                 }
                 else
@@ -508,19 +587,22 @@ class editor
         {
             if (this.cursory==0)
             {
-                return;
+                return "";
             }
             else
             {
                 this.cursory--;
                 this.cursorx=this.lineArray[this.docTopline+this.cursory].length;
+                return "\n";
             }
         }
         else
         {
+            var removedChar=str[str.length-1];
             str=str.substring(0, str.length - 1);
             this.lineArray[this.docTopline+this.cursory]=str;
             this.cursorx--;
+            return removedChar;
         }
     }
 
@@ -552,6 +634,11 @@ class editor
         {
             this.rearrangeLines(this.docTopline+this.cursory);
             this.cursory+=1;
+            if (this.cursory==(this.numRows-1))
+            {
+                this.cursory--;
+                this.docTopline++;
+            }
         }
         else
         {
@@ -618,5 +705,8 @@ class editor
 
         // draw status bar
         this.statusBar.draw();
+
+        // draw scrollbar
+        this.scrollBar.draw();
     }
 }
