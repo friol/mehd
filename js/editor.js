@@ -4,8 +4,9 @@ class editor
 {
     constructor(cnvsid,edversion)
     {
+        // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
-            [188,',',';'],[187,'+','*'],[220,'\\','|'],[189,'-','_'],
+            [186,'x','X','{'],[187,'x','X','}'],[188,',',';'],[187,'+','*'],[220,'\\','|'],[189,'-','_'],
             [226,'<','>'],
             [48,'0','='],[49,'1','!'],[50,'2','"'],[51,'3','£'],[52,'4','$'],[53,'5','%'],
             [54,'6','&'],[55,'7','/'],[56,'8','('],[57,'9',')']
@@ -40,7 +41,7 @@ class editor
         // resize canvas basing on columns/rows width
 
         var cnvsWidth=(this.numTotColumns*this.fontManager.fontwidth)+(this.numTotColumns*this.fontManager.multiplier)+2;
-        var cnvsHeight=this.numRows*this.fontManager.fontheight+6;
+        var cnvsHeight=this.numRows*this.fontManager.fontheight+6+(this.numRows);
 
         document.getElementById(this.cnvsid).width=cnvsWidth;
         document.getElementById(this.cnvsid).height=cnvsHeight;
@@ -268,8 +269,8 @@ class editor
         {
             this.lineArray=[];
             this.lineArray.push("A sample of text.");
-            this.lineArray.push("The quick brown palomb jumped over the lazy tlc.");
-            this.lineArray.push("<=ASCII-art=>");
+            this.lineArray.push("The quick brown fox jumped over the lazy dog.");
+            this.lineArray.push("One more line.");
             this.lineArray.push("");
             this.cursorx=0;
             this.cursory=3;
@@ -546,13 +547,20 @@ class editor
                 {
                     if (this.keypressRemap[m][0]==e.keyCode)
                     {
-                        if (e.shiftKey)
+                        if (e.shiftKey && !e.getModifierState("AltGraph"))
                         {
                             charToAdd=this.keypressRemap[m][2];
+                            break;
+                        }
+                        else if (e.getModifierState("AltGraph"))
+                        {
+                            charToAdd=this.keypressRemap[m][3];    
+                            break;
                         }
                         else
                         {
                             charToAdd=this.keypressRemap[m][1];
+                            break;
                         }
                     }
                 }

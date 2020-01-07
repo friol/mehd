@@ -122,6 +122,7 @@ class fontmgr
         const context = canvas.getContext('2d');
 
         var origPx=px;
+        var origPy=py;
 
         px*=this.fontwidth;
         py*=this.fontheight;
@@ -132,6 +133,9 @@ class fontmgr
         // inner margin
         px+=1;
         py+=1;
+
+        // line spacing
+        py+=origPy;
 
         var charShift=32;
         var charIndex=ch.charCodeAt(0)-charShift;
