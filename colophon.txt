@@ -3,7 +3,6 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* color schemes
 * undo for string paste
 * properly handle multiline selections
 * pixel-art right scrollbar with dynamic center widget
@@ -26,3 +25,4 @@ DONE
 * mouse selection
 * 1px space between lines
 * poor man's tabulations
+* color schemas

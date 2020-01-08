@@ -23,6 +23,54 @@ class scrollbar
         this.fgcolor=colpal[0];
 
         // todo: convert arrow images to fgcolor
+        this.arrowArray=[];
+        this.initArrowArray();
+    }
+
+    setColors(colpal)
+    {
+        this.fgcolor=colpal[0];
+    }
+
+    colToRGB(strcol)
+    {
+        strcol=strcol.replace("#","");
+        var r=parseInt(strcol.substring(0,2),16);
+        var g=parseInt(strcol.substring(2,4),16);
+        var b=parseInt(strcol.substring(4,6),16);
+        return [r,g,b];
+    }
+
+    initArrowArray()
+    {
+        this.arrowArray=[];
+        var imgup=document.getElementById(this.sbupId);
+        var imgdn=document.getElementById(this.sbdnId);
+
+        for (var i=0;i<2;i++)
+        {
+            var cvs = document.createElement('canvas');
+            cvs.width = imgup.width; 
+            cvs.height = imgup.height;
+            var ctx = cvs.getContext("2d");
+
+            if (i==0) ctx.drawImage(imgup,0,0);
+            else ctx.drawImage(imgdn,0,0);
+
+            var idt1 = ctx.getImageData(0,0,cvs.width,cvs.height);
+            var data1 = idt1.data;
+
+            for (var p=0;p<data1.length;p+=4)
+            {
+                if ((data1[p+0]==0)&&(data1[p+1]==0)&&(data1[p+2]==0)&&(data1[p+3]==255))
+                {
+                    data1[p+0]=this.colToRGB(this.fgcolor)[0]; data1[p+1]=this.colToRGB(this.fgcolor)[1]; data1[p+2]=this.colToRGB(this.fgcolor)[2]; data1[p+3]=255;
+                }
+            }        
+
+            ctx.putImageData(idt1,0,0);
+            this.arrowArray.push(cvs);
+        }
     }
 
     draw()
@@ -31,7 +79,7 @@ class scrollbar
         var imgdn=document.getElementById(this.sbdnId);
 
         // uparrow 
-        this.context.drawImage(imgup,this.px-(this.multiplier)-2,this.multiplier);
+        this.context.drawImage(this.arrowArray[0],this.px-(this.multiplier)-2,this.multiplier);
 
         this.context.beginPath();
         this.context.strokeStyle = this.fgcolor;
@@ -41,7 +89,7 @@ class scrollbar
 
         // dwnarrow
         var ypos=this.canvas.height-this.fontheight-(this.multiplier*2)-imgdn.height;
-        this.context.drawImage(imgdn,this.px-(this.multiplier)-2,ypos-this.multiplier);
+        this.context.drawImage(this.arrowArray[1],this.px-(this.multiplier)-2,ypos-this.multiplier);
 
         this.context.beginPath();
         this.context.strokeStyle = this.fgcolor;

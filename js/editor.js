@@ -6,8 +6,8 @@ class editor
     {
         // color palette
         // foreground, background, selection color
-        //this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
-        this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
+        this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
+        //this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
 
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
@@ -314,6 +314,28 @@ class editor
         else if ((cmd=="ver")||(cmd=="v"))
         {
             return "Mehd version "+this.edVersion;
+        }
+        else if (cmd.split(" ")[0]=="palette")
+        {
+            if (cmd.split(" ")[1]=="0")
+            {
+                this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
+            }
+            else if (cmd.split(" ")[1]=="1")
+            {
+                this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
+            }
+            else if (cmd.split(" ")[1]=="2")
+            {
+                this.colorPalette=["#657b83","#fdf6e3","#268bd2"];
+            }
+
+            this.fontManager.setColors(this.colorPalette);
+            this.fontManager.initFontCanvasArray();
+            this.fontManager.initReverseCanvasArray();
+            this.scrollBar.setColors(this.colorPalette);
+            this.scrollBar.initArrowArray();
+            return "Palette changed.";
         }
         else
         {

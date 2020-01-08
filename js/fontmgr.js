@@ -38,6 +38,7 @@ class fontmgr
 
     initFontCanvasArray()
     {
+        this.fontCanvasArray=[];
         var img=document.getElementById("fontImage");
 
         for (var l=0;l<this.numLettersX*this.numLettersY;l++)
@@ -76,6 +77,7 @@ class fontmgr
 
     initReverseCanvasArray()
     {
+        this.reverseCanvasArray=[];
         var img=document.getElementById("fontImage");
 
         for (var l=0;l<this.numLettersX*this.numLettersY;l++)
@@ -124,6 +126,13 @@ class fontmgr
             ctx.putImageData(idt,0,0);
             this.reverseCanvasArray.push(cvs);
         }
+    }
+
+    setColors(colorPal)
+    {
+        this.fgcolor=colorPal[0];
+        this.bgcolor=colorPal[1];
+        this.selcolor=colorPal[2];        
     }
 
     getCharCoord(x,y)
