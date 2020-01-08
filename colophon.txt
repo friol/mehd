@@ -3,9 +3,10 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* color schemes
 * undo for string paste
 * properly handle multiline selections
-* pixel-art right scrollbar
+* pixel-art right scrollbar with dynamic center widget
 * scolling old-school (whole lines)
 * word wrap with text on the next line
 * keyboard "chords" commands
@@ -24,3 +25,4 @@ DONE
 * ctrl-X (cut)
 * mouse selection
 * 1px space between lines
+* poor man's tabulations

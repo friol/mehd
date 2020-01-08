@@ -1,12 +1,17 @@
-/* the main editor */
+/* the main editor - friol 2k20 */
 
 class editor
 {
     constructor(cnvsid,edversion)
     {
+        // color palette
+        // foreground, background, selection color
+        //this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
+        this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
+
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
-            [186,'x','X','{'],[187,'x','X','}'],[188,',',';'],[187,'+','*'],[220,'\\','|'],[189,'-','_'],
+            [186,'x','X','{'],[187,'+','*','}'],[188,',',';'],[220,'\\','|'],[189,'-','_'],
             [226,'<','>'],
             [48,'0','='],[49,'1','!'],[50,'2','"'],[51,'3','£'],[52,'4','$'],[53,'5','%'],
             [54,'6','&'],[55,'7','/'],[56,'8','('],[57,'9',')']
@@ -14,9 +19,9 @@ class editor
 
         this.cnvsid=cnvsid;
         this.edVersion=edversion;
-        this.fontManager=new fontmgr(cnvsid);
+        this.fontManager=new fontmgr(cnvsid,this.colorPalette[0],this.colorPalette[1],this.colorPalette[2]);
 
-        this.lineArray=[];
+        this.lineArray=[""];
         
         this.cursory=0;
         this.cursorx=0;
@@ -48,7 +53,7 @@ class editor
 
         // init some object that will be usefull later
 
-        this.scrollBar=new scrollbar(cnvsid,"arrowUp","arrowDown",this.fontManager.multiplier,this.fontManager.fontheight);
+        this.scrollBar=new scrollbar(cnvsid,"arrowUp","arrowDown",this.fontManager.multiplier,this.fontManager.fontheight,this.colorPalette);
         this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numTotColumns);
         this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
         this.undoManager=new undomgr();
@@ -451,6 +456,19 @@ class editor
                 return false;
             }
         }
+        else if (e.keyCode==9)
+        {
+            // tab
+            this.selection.active=false;
+
+            if (this.editorMode==0)
+            {
+                this.lineArray[this.docTopline+this.cursory]+="    ";
+                this.cursorx+=4;
+                e.preventDefault();
+                return false;
+            }
+        }
         else if (e.keyCode==13)
         {
             // carriage return
@@ -513,6 +531,24 @@ class editor
                 else
                 {
                     this.cursory--;
+                }
+            }
+        }
+        else if (e.keyCode==40)
+        {
+            // arrow down
+            if (this.editorMode==0)
+            {
+                if (this.cursory<this.lineArray.length)
+                {
+                    if (this.cursory==(this.numRows-1))
+                    {
+                        this.docTopline++;
+                    }
+                    else
+                    {
+                        this.cursory++;
+                    }
                 }
             }
         }
@@ -685,7 +721,7 @@ class editor
 
         const canvas=document.getElementById(this.cnvsid);
         const context = canvas.getContext('2d');
-        context.fillStyle = "#19432B";
+        context.fillStyle=this.colorPalette[1];
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw eventual selection

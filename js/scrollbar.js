@@ -2,7 +2,7 @@
 
 class scrollbar
 {
-    constructor(cnvsid,arrowUpId,arrowDownId,multiplier,fontheight)
+    constructor(cnvsid,arrowUpId,arrowDownId,multiplier,fontheight,colpal)
     {
         this.canvas=document.getElementById(cnvsid);
         this.context = this.canvas.getContext('2d');
@@ -19,6 +19,10 @@ class scrollbar
 
         this.multiplier=multiplier;
         this.fontheight=fontheight;
+
+        this.fgcolor=colpal[0];
+
+        // todo: convert arrow images to fgcolor
     }
 
     draw()
@@ -30,7 +34,7 @@ class scrollbar
         this.context.drawImage(imgup,this.px-(this.multiplier)-2,this.multiplier);
 
         this.context.beginPath();
-        this.context.strokeStyle = "#83FFC7";
+        this.context.strokeStyle = this.fgcolor;
         this.context.lineWidth = this.multiplier;
         this.context.rect(this.px-(this.multiplier*2)-2-1,3,this.arrowwidth+(this.multiplier*2),this.arrowwidth);
         this.context.stroke();
@@ -40,7 +44,7 @@ class scrollbar
         this.context.drawImage(imgdn,this.px-(this.multiplier)-2,ypos-this.multiplier);
 
         this.context.beginPath();
-        this.context.strokeStyle = "#83FFC7";
+        this.context.strokeStyle = this.fgcolor;
         this.context.lineWidth = this.multiplier;
         this.context.rect(this.px-(this.multiplier*2)-2-1,
                 ypos-this.multiplier*3,
@@ -51,7 +55,7 @@ class scrollbar
         // big rectangle
         
         this.context.beginPath();
-        this.context.strokeStyle = "#83FFC7";
+        this.context.strokeStyle = this.fgcolor;
         this.context.lineWidth = this.multiplier;
         this.context.rect(this.px-(this.multiplier*2)-2-1,
                 1+this.arrowheight+this.multiplier*5,
@@ -65,7 +69,7 @@ class scrollbar
 
         for (var c=1;c<totalLen;c+=step)
         {
-            this.context.fillStyle = "#83FFC7";
+            this.context.fillStyle = this.fgcolor;
             this.context.fillRect(this.px-(this.multiplier)-1,this.arrowheight+this.multiplier*6+c,this.arrowwidth-(this.multiplier),this.fontheight);
         }
     }

@@ -2,7 +2,7 @@
 
 class fontmgr
 {
-    constructor(cnvsid)
+    constructor(cnvsid,fgcolor,bgcolor,selcolor)
     {
         this.cnvsid=cnvsid;
 
@@ -14,10 +14,64 @@ class fontmgr
         this.numLettersX=18;
         this.numLettersY=6;
 
+        this.fgcolor=fgcolor;
+        this.bgcolor=bgcolor;
+        this.selcolor=selcolor;
+
         //
+
+        this.fontCanvasArray=[];
+        this.initFontCanvasArray();
 
         this.reverseCanvasArray=[];
         this.initReverseCanvasArray();
+    }
+
+    colToRGB(strcol)
+    {
+        strcol=strcol.replace("#","");
+        var r=parseInt(strcol.substring(0,2),16);
+        var g=parseInt(strcol.substring(2,4),16);
+        var b=parseInt(strcol.substring(4,6),16);
+        return [r,g,b];
+    }
+
+    initFontCanvasArray()
+    {
+        var img=document.getElementById("fontImage");
+
+        for (var l=0;l<this.numLettersX*this.numLettersY;l++)
+        {
+            var cvs = document.createElement('canvas');
+            cvs.width = this.fontwidth+this.multiplier; 
+            cvs.height = this.fontheight+this.multiplier;
+            var ctx = cvs.getContext("2d");
+    
+            var realPosx=l%this.numLettersX;
+            var realPosy=Math.floor(l/this.numLettersX);
+
+            ctx.drawImage(img,realPosx*this.fontwidth+(this.lettersShiftX*realPosx),realPosy*this.fontheight,
+                            this.fontwidth,this.fontheight,
+                            0,0,
+                            this.fontwidth,this.fontheight);
+
+            var idt = ctx.getImageData(0,0,cvs.width,cvs.height);
+            var data = idt.data;
+
+            for (var p=0;p<data.length;p+=4)
+            {
+                var a=data[p+3];
+                if ((data[p+0]==24)&&(data[p+1]==49)&&(data[p+2]==37))
+                {
+                    data[p+0]=this.colToRGB(this.fgcolor)[0];
+                    data[p+1]=this.colToRGB(this.fgcolor)[1];
+                    data[p+2]=this.colToRGB(this.fgcolor)[2];
+                }
+            }
+
+            ctx.putImageData(idt,0,0);
+            this.fontCanvasArray.push(cvs);
+        }
     }
 
     initReverseCanvasArray()
@@ -59,11 +113,11 @@ class fontmgr
 
                 if (a==0)
                 {
-                    data[p+0]=131; data[p+1]=255; data[p+2]=199; data[p+3]=255;
+                    data[p+0]=this.colToRGB(this.fgcolor)[0]; data[p+1]=this.colToRGB(this.fgcolor)[1]; data[p+2]=this.colToRGB(this.fgcolor)[2]; data[p+3]=255;
                 }
                 else
                 {
-                    data[p+0]=25; data[p+1]=67; data[p+2]=43; data[p+3]=255;
+                    data[p+0]=this.colToRGB(this.bgcolor)[0]; data[p+1]=this.colToRGB(this.bgcolor)[1]; data[p+2]=this.colToRGB(this.bgcolor)[2]; data[p+3]=255;
                 }
             }
 
@@ -74,10 +128,8 @@ class fontmgr
 
     getCharCoord(x,y)
     {
-        //alert(x+" "+y);
         var charx=Math.floor(x/(this.fontwidth+this.multiplier));
         var chary=Math.floor(y/(this.fontheight));
-
         return [charx,chary];        
     }
 
@@ -87,6 +139,7 @@ class fontmgr
         const context = canvas.getContext('2d');
 
         var origPx=x;
+        var origPy=y;
 
         x*=this.fontwidth;
         y*=this.fontheight;
@@ -97,8 +150,11 @@ class fontmgr
         // inner margin
         x+=1;
 
-        context.fillStyle="#3d9ab3";
-        context.fillRect(x,y,this.fontwidth+this.multiplier,this.fontheight);
+        // line spacing
+        y+=origPy;
+
+        context.fillStyle=this.selcolor;
+        context.fillRect(x,y,this.fontwidth+this.multiplier,this.fontheight+1);
     }
 
     drawCursor(cx,cy,ctick,csteps,inverted)
@@ -153,7 +209,8 @@ class fontmgr
         if (!chreverse)
         {
             context.globalAlpha = chalpha;
-            context.drawImage(img,realPosx*this.fontwidth+(this.lettersShiftX*realPosx),realPosy*this.fontheight,this.fontwidth,this.fontheight,px,py,this.fontwidth,this.fontheight);
+            var cvs=this.fontCanvasArray[charIndex];
+            context.drawImage(cvs,px,py);            
             context.globalAlpha = 1;
         }
         else
