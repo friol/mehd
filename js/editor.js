@@ -315,8 +315,13 @@ class editor
         {
             return "Mehd version "+this.edVersion;
         }
-        else if (cmd.split(" ")[0]=="palette")
+        else if (cmd.split(" ")[0]=="theme")
         {
+            if (cmd.split(" ").length!=2)
+            {
+                return "Theme command without argument.";
+            }
+
             if (cmd.split(" ")[1]=="0")
             {
                 this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
@@ -327,7 +332,11 @@ class editor
             }
             else if (cmd.split(" ")[1]=="2")
             {
-                this.colorPalette=["#657b83","#fdf6e3","#268bd2"];
+                this.colorPalette=["#657b83","#fdf6e3","#cec8b5"];
+            }
+            else
+            {
+                return "Valid themes: 0, 1 or 2.";
             }
 
             this.fontManager.setColors(this.colorPalette);
@@ -335,7 +344,7 @@ class editor
             this.fontManager.initReverseCanvasArray();
             this.scrollBar.setColors(this.colorPalette);
             this.scrollBar.initArrowArray();
-            return "Palette changed.";
+            return "Theme changed.";
         }
         else
         {
