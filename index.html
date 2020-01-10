@@ -5,6 +5,8 @@
 
         <link rel="icon" type="image/png" sizes="16x16" href="img/mehd.png">
 
+        <script src="js/peg-0.10.0.js"></script>
+        <script src="js/luaengine.js"></script>
         <script src="js/fontmgr.js"></script>
         <script src="js/undomgr.js"></script>
         <script src="js/scrollbar.js"></script>
@@ -22,6 +24,18 @@
 
         <img id="arrowUp" src="img/arrowUp.png" style="display:none" />
         <img id="arrowDown" src="img/arrowDown.png" style="display:none" />
+
+        <div id="luaGrammar" style="display:none">
+        start = additive
+
+        additive = left:multiplicative "+" right:additive { return left + right; } / multiplicative
+
+        multiplicative = left:primary "*" right:multiplicative { return left * right; } / primary
+
+        primary = integer / "(" additive:additive ")" { return additive; }
+
+        integer "integer" = digits:[0-9]+ { return parseInt(digits.join(""), 10); }
+        </div>
 
     </body>
 

@@ -4,10 +4,8 @@ class editor
 {
     constructor(cnvsid,edversion)
     {
-        // color palette
-        // foreground, background, selection color
+        // theme: foreground, background, selection color
         this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
-        //this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
 
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
@@ -51,12 +49,13 @@ class editor
         document.getElementById(this.cnvsid).width=cnvsWidth;
         document.getElementById(this.cnvsid).height=cnvsHeight;
 
-        // init some object that will be usefull later
+        // init some objects that will be usefull later
 
         this.scrollBar=new scrollbar(cnvsid,"arrowUp","arrowDown",this.fontManager.multiplier,this.fontManager.fontheight,this.colorPalette);
         this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numTotColumns);
         this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
         this.undoManager=new undomgr();
+        this.theLuaEngine=new luaengine();
 
         // event handlers
 
@@ -314,6 +313,12 @@ class editor
         else if ((cmd=="ver")||(cmd=="v"))
         {
             return "Mehd version "+this.edVersion;
+        }
+        else if (cmd=="run")
+        {
+            // parse and run code
+            var res=this.theLuaEngine.parseAndRun(this.lineArray);
+            return "Result:"+res;
         }
         else if (cmd.split(" ")[0]=="theme")
         {
