@@ -26,15 +26,116 @@
         <img id="arrowDown" src="img/arrowDown.png" style="display:none" />
 
         <div id="luaGrammar" style="display:none">
-        start = additive
+        
+            start=(instr:instruction newLine)*
 
-        additive = left:multiplicative "+" right:additive { return left + right; } / multiplicative
+            instruction=[ \t]* comm:comment {return comm; } /
+            [ \t]* assi:assignmentStatement {return assi;} /
+            [ \t]* fori:forStatement {return fori;} /
+            [ \t]* iffe:ifStatement {return iffe;} /
+            [ \t]* fcall:functionCallStatement {return fcall;} /
+            [ \t]* emptyLine
 
-        multiplicative = left:primary "*" right:multiplicative { return left * right; } / primary
+            /* comment statement */
 
-        primary = integer / "(" additive:additive ")" { return additive; }
+            comment="--" commentText:[ A-Za-z0-9\.\;\,\:\-\_\?\'\^\!\"\$]* { return ['COMMENT',commentText.join('')]; }
 
-        integer "integer" = digits:[0-9]+ { return parseInt(digits.join(""), 10); }
+            /* assignment statement */
+
+            assignmentStatement=vname:variableName "=" rval:expression { return ['ASSIGNMENT',vname,rval] }
+
+            variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return the1var+the2var.join(""); } 
+
+            /* if statement */
+
+            ifStatement="if" [ ]+ expression rop:relop expression [ ]+ "then" "\n" instruction* "end" { return ['IF',rop] }
+
+            relop="<"/"<="/"=="/">="/">"
+
+            expression=additive
+
+            additiveOperator = "+" { return "+"; } / "-" { return "-"; }
+
+            multiplicativeOperator = "*" { return "*"; } / "/" { return "/"; }
+            
+            additive = head:multiplicative tail:(additiveOperator multiplicative)* 
+            {      
+                var result = head;      
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    result = 
+                    {          
+                        tag: 			tail[i][0],          
+                        left:     result,          
+                        right:    tail[i][1]        
+                    };      
+                }      
+                return result;    
+            }
+
+            multiplicative = head:primary tail:(multiplicativeOperator primary)* 
+            {      
+                var result = head;      
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    result = 
+                    {          
+                        tag: 			tail[i][0],          
+                        left:     result,          
+                        right:    tail[i][1]        
+                    };      
+                }      
+                return result;    
+            }
+
+            primary=integerNumber/
+            quotedString/
+            functionCallStatement/
+            variableName/
+            "(" additive:additive ")"  { return additive; }
+
+            /* for statement */
+
+            forStatement="for" [ ]+ vname:variableName "=" fromi:integerNumber "," toi:integerNumber [ ]+ "do" "\n" 
+                instruction* "end" { return ['FOR',vname,fromi,toi]}
+
+            functionCallStatement=funname:functionName "(" alist:arglist ")" { return ['FUNCTIONCALL',funname,alist] }
+
+            functionName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return the1var+the2var.join(""); } 
+
+            arglist = head:argument tail:("," argument)*
+            {
+                var dataArray=new Array();
+                dataArray.push(head);
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    dataArray.push(tail[i][1]);
+                }	
+                return ["FUNARGLIST",dataArray];
+            }            
+
+            argument=expression
+
+            integerNumber = sign:"-"? digits:[0-9]+
+            {
+                var val=parseInt(digits.join(""), 10); 
+            
+                if (sign=="-")
+                {
+                    return -val; 
+                }
+                
+                return val;
+            }
+
+            doubleQuotes="\""
+
+            quotedString = doubleQuotes stringCorpus:[a-zA-Z0-9 ]* doubleQuotes { return stringCorpus.join(''); }
+
+            emptyLine= "\n"
+
+            newLine="\n"
+            
         </div>
 
     </body>

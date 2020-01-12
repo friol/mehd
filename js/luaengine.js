@@ -20,7 +20,18 @@ class luaengine
     {
         try
         {
-            var res=this.parser.parse(txtarr[0]);
+            var program="";
+
+            for (var i=0;i<txtarr.length;i++)
+            {
+                if (txtarr[i].length>0)
+                {
+                    program+=txtarr[i]+"\n";
+                }
+            }
+
+            var res=this.parser.parse(program);
+            this.execute(res);
             return res;
         }
         catch(e)
@@ -28,5 +39,23 @@ class luaengine
             alert("Error parsing code: ["+e.toString()+"]");
             return 0;
         }
+    }
+
+    execute(parseTree)
+    {
+        parseTree.forEach(element => 
+        {
+            var eltype=element[0];
+            
+            if (eltype=="COMMENT")
+            {
+                // pass
+            }
+            else if (eltype=="ASSIGNMENT")
+            {
+                
+            }
+        }
+        );
     }
 }
