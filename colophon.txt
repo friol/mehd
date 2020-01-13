@@ -3,7 +3,7 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* lua syntax scripting engine!!!
+* lua syntax scripting engine
 * undo for string paste
 * properly handle multiline selections
 * pixel-art right scrollbar with dynamic center widget
