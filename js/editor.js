@@ -55,7 +55,9 @@ class editor
         this.statusBar=new statusbar(0,0,cnvsid,this.numRows,this.fontManager,this.numTotColumns);
         this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
         this.undoManager=new undomgr();
+        
         this.theLuaEngine=new luaengine();
+        this.picoDisplay=new vcdisplay(this.cnvsid);
 
         // event handlers
 
@@ -272,9 +274,9 @@ class editor
         if (cmd=="test")
         {
             this.lineArray=[];
-            this.lineArray.push("A sample of text.");
-            this.lineArray.push("The quick brown fox jumped over the lazy dog.");
-            this.lineArray.push("One more line.");
+            this.lineArray.push("-- this is a LUA comment");
+            this.lineArray.push("variable=42");
+            this.lineArray.push("var2=10");
             this.lineArray.push("");
             this.cursorx=0;
             this.cursory=3;
@@ -788,5 +790,8 @@ class editor
 
         // draw scrollbar
         this.scrollBar.draw();
+
+        // draw display
+        this.picoDisplay.draw();
     }
 }

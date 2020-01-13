@@ -5,6 +5,7 @@ class luaengine
     constructor()
     {
         var tempGrammar=document.getElementById("luaGrammar").innerText;
+        this.parsetree=null;
 
         try
         {
@@ -30,9 +31,9 @@ class luaengine
                 }
             }
 
-            var res=this.parser.parse(program);
-            this.execute(res);
-            return res;
+            this.parsetree=this.parser.parse(program);
+            this.execute();
+            return this.parsetree;
         }
         catch(e)
         {
@@ -41,11 +42,25 @@ class luaengine
         }
     }
 
-    execute(parseTree)
+    evaluateExpression(e)
     {
-        parseTree.forEach(element => 
+        if (typeof e == 'number')
         {
-            var eltype=element[0];
+            // expression is an immediate number
+            return ['NUMBER',e];
+        }
+        else if (typeof e == 'string')
+        {
+            // expression is a string
+            return ['STRING',e];
+        }
+    }
+
+    execute()
+    {
+        this.parsetree.forEach(element => 
+        {
+            var eltype=element[0][0];
             
             if (eltype=="COMMENT")
             {
@@ -53,6 +68,13 @@ class luaengine
             }
             else if (eltype=="ASSIGNMENT")
             {
+                var varName=element[0][1];
+                var varValue=this.evaluateExpression(element[0][2]);
+
+            }
+            else if (eltype=="FUNCTIONCALL")
+            {
+                var funName=element[0][1];
                 
             }
         }
