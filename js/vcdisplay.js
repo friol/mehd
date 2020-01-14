@@ -28,6 +28,25 @@ class vcdisplay
         this.srcContext.fillRect(0, 0, this.srcCanvas.width, this.srcCanvas.height);
     }
 
+    setPenColor(palcol)
+    {
+        this.pencolor=palcol;
+    }
+
+    rectfill(x0,y0,x1,y1,palcol)
+    {
+        if (palcol==-1) palcol=this.pencolor;
+        this.srcContext.fillStyle=this.palette[palcol];
+        this.srcContext.fillRect(x0,y0,x1-x0,y1-y0);
+    }
+
+    cls(palcol)
+    {
+        if (palcol==-1) palcol=this.pencolor;
+        this.srcContext.fillStyle=this.palette[palcol];
+        this.srcContext.fillRect(0,0,this.dimx,this.dimy);
+    }
+
     draw()
     {
         this.context.drawImage(this.srcCanvas,this.px,this.py);

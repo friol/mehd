@@ -56,8 +56,8 @@ class editor
         this.selection=new selection(cnvsid,this.numColumns,this.fontManager,this.lineArray);
         this.undoManager=new undomgr();
         
-        this.theLuaEngine=new luaengine();
         this.picoDisplay=new vcdisplay(this.cnvsid);
+        this.theLuaEngine=new luaengine(this.picoDisplay);
 
         // event handlers
 
