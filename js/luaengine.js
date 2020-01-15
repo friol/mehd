@@ -72,6 +72,17 @@ class luaengine
                     return ['NUMBER',localScope[variableName]];
                 }
             }
+            else if (variableName in globalScope)
+            {
+                if (typeof globalScope[variableName]=='string')
+                {
+                    return ['STRING',globalScope[variableName]];
+                }
+                else if (typeof globalScope[variableName]=='number')
+                {
+                    return ['NUMBER',globalScope[variableName]];
+                }
+            }
         }
         else if (typeof e === 'object')
         {
@@ -172,7 +183,10 @@ class luaengine
             {
                 var varName=element[0][1];
                 var varValue=this.evaluateExpression(element[0][2],localScope,globalScope);
-
+                if (level==0)
+                {
+                    globalScope[varName]=varValue;
+                }
             }
             else if (eltype=="FUNCTIONCALL")
             {
