@@ -33,7 +33,7 @@ class luaengine
             }
 
             this.parsetree=this.parser.parse(program);
-            var result=this.execute();
+            var result=this.execute(this.parsetree,[],[],0);
             return result;
         }
         catch(e)
@@ -121,9 +121,11 @@ class luaengine
         return [0,"Ok"];
     }
 
-    execute()
+    execute(instructions,localScope,globalScope,level)
     {
-        for (const element of this.parsetree)
+        var l=instructions.length;
+
+        for (const element of instructions)
         {
             var eltype=element[0][0];
             
@@ -164,8 +166,19 @@ class luaengine
                         return ret[1];
                     }
                 }
+            }
+            else if (eltype=="FOR")
+            {
+                var cycleVariable=element[0][1];
+                var cycleFrom=this.evaluateExpression(element[0][2])[1];
+                var cycleTo=this.evaluateExpression(element[0][3])[1];
 
-
+                localScope.cycleVariable=0;
+                for (var i=cycleFrom;i<=cycleTo;i++)
+                {
+                    localScope.cycleVariable=i;
+                    this.execute(element[0][4],localScope,globalScope,level+1);
+                }
             }
         }
 

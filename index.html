@@ -98,7 +98,15 @@
             /* for statement */
 
             forStatement="for" [ ]+ vname:variableName "=" fromi:integerNumber "," toi:integerNumber [ ]+ "do" "\n" 
-                instruction* "end" { return ['FOR',vname,fromi,toi]}
+                instrs:(instruction)* "end" 
+                {
+                    var dataArray=new Array();
+                    for (var i = 0; i < instrs.length; i++)
+                    {        
+                        dataArray.push([instrs[i]]);
+                    }
+                    return ["FOR",vname,fromi,toi,dataArray];
+                }
 
             functionCallStatement=funname:functionName "(" alist:arglist? ")" { return ['FUNCTIONCALL',funname,alist] }
 
