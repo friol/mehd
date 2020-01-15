@@ -43,7 +43,7 @@ class luaengine
         }
     }
 
-    evaluateExpression(e)
+    evaluateExpression(e,localScope,globalScope)
     {
         if (typeof e == 'number')
         {
@@ -55,11 +55,41 @@ class luaengine
             // expression is a string
             return ['STRING',e];
         }
+        else if ((typeof e=='object')&&(e.length>0)&&(e[0]=='VARIABLE'))
+        {
+            var variableName=e[1];
+
+            // search variable name in local/global scope
+
+            if (variableName in localScope)
+            {
+                if (typeof localScope[variableName]=='string')
+                {
+                    return ['STRING',localScope[variableName]];
+                }
+                else if (typeof localScope[variableName]=='number')
+                {
+                    return ['NUMBER',localScope[variableName]];
+                }
+            }
+        }
         else if (typeof e === 'object')
         {
             if (e.operator=="+")
             {
-                return this.evaluateExpression(e.left)[1]+this.evaluateExpression(e.right)[1];
+                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]+this.evaluateExpression(e.right,localScope,globalScope)[1]];
+            }
+            else if (e.operator=="-")
+            {
+                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]-this.evaluateExpression(e.right,localScope,globalScope)[1]];
+            }
+            else if (e.operator=="*")
+            {
+                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]*this.evaluateExpression(e.right,localScope,globalScope)[1]];
+            }
+            else if (e.operator=="\/")
+            {
+                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]*this.evaluateExpression(e.right,localScope,globalScope)[1]];
             }
         }
     }
@@ -113,6 +143,11 @@ class luaengine
         {
             // do nothing (for now)
         }
+        else if (fname=="logprint")
+        {
+            var msg=arglist[0][1];
+            alert(msg);
+        }
         else
         {
             return [1,"Unknown function "+fname+"."];
@@ -136,7 +171,7 @@ class luaengine
             else if (eltype=="ASSIGNMENT")
             {
                 var varName=element[0][1];
-                var varValue=this.evaluateExpression(element[0][2]);
+                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope);
 
             }
             else if (eltype=="FUNCTIONCALL")
@@ -156,7 +191,7 @@ class luaengine
                     var parsedArgList=[];
                     argList.forEach(arg =>
                         {
-                            parsedArgList.push(this.evaluateExpression(arg));
+                            parsedArgList.push(this.evaluateExpression(arg,localScope,globalScope));
                         }
                     );
 
@@ -170,8 +205,8 @@ class luaengine
             else if (eltype=="FOR")
             {
                 var cycleVariable=element[0][1];
-                var cycleFrom=this.evaluateExpression(element[0][2])[1];
-                var cycleTo=this.evaluateExpression(element[0][3])[1];
+                var cycleFrom=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
+                var cycleTo=this.evaluateExpression(element[0][3],localScope,globalScope)[1];
 
                 localScope.cycleVariable=0;
                 for (var i=cycleFrom;i<=cycleTo;i++)

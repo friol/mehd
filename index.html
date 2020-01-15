@@ -45,7 +45,7 @@
 
             assignmentStatement=vname:variableName "=" rval:expression { return ['ASSIGNMENT',vname,rval] }
 
-            variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return the1var+the2var.join(""); } 
+            variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['VARIABLE',the1var+the2var.join("")]; } 
 
             /* if statement */
 
