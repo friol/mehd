@@ -274,12 +274,28 @@ class editor
         if (cmd=="test")
         {
             this.lineArray=[];
-            this.lineArray.push("-- this is a LUA comment");
-            this.lineArray.push("variable=42");
-            this.lineArray.push("var2=10");
+/*
+            this.lineArray.push("-- move a point along the screen diagonal");
+            this.lineArray.push("cls(0)");
+            this.lineArray.push("color(7)");
+            this.lineArray.push("for c=0,122 do");
+            this.lineArray.push("cls(0)");
+            this.lineArray.push("rectfill(c,c,c+8,c+8)");
+            this.lineArray.push("flip()");
+            this.lineArray.push("end");
+*/
+            this.lineArray.push("-- 16 colorful bars");
+            this.lineArray.push("cls(0)");
+            this.lineArray.push("for c=0,15 do");
+            this.lineArray.push("color(c)");
+            this.lineArray.push("rectfill(0,c*8,128,c*8+8)");
+            this.lineArray.push("flip()");
+            this.lineArray.push("end");
+
             this.lineArray.push("");
+
             this.cursorx=0;
-            this.cursory=3;
+            this.cursory=this.lineArray.length-1;
             return "Sample text uploaded."
         }
         else if (cmd=="wc")
@@ -316,7 +332,7 @@ class editor
         {
             return "Mehd version "+this.edVersion;
         }
-        else if (cmd=="run")
+        else if ((cmd=="run")||(cmd=="r"))
         {
             // parse and run code
             var res=this.theLuaEngine.parseAndRun(this.lineArray);

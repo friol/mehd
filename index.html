@@ -35,7 +35,12 @@
             [ \t]* fori:forStatement {return fori;} /
             [ \t]* iffe:ifStatement {return iffe;} /
             [ \t]* fcall:functionCallStatement {return fcall;} /
+            [ \t]* increment:incrementStatement {return increment;} /
             [ \t]* emptyLine
+
+            /* increment statement */
+
+            incrementStatement=vname:variableName "+=" rval:expression { return ['INCREMENT',vname,rval] }
 
             /* comment statement */
 

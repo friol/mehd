@@ -18,6 +18,19 @@ class luaengine
         }
     }
 
+    // helpers
+
+    componentToHex(c) 
+    {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+    
+    rgbToHex(r, g, b) 
+    {
+        return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
+    }
+
     parseAndRun(txtarr)
     {
         try
@@ -38,7 +51,7 @@ class luaengine
         }
         catch(e)
         {
-            alert("Error parsing code: ["+e.toString()+"]");
+            alert("Syntax error: ["+e.toString()+"]");
             return 0;
         }
     }
@@ -54,6 +67,33 @@ class luaengine
         {
             // expression is a string
             return ['STRING',e];
+        }
+        else if ((typeof e=='object')&&(e.length>0)&&(e[0]=='FUNCTIONCALL'))
+        {
+            var funName=e[1];
+            var funArgList=e[2];
+
+            var parsedArgList=[];
+            if (funArgList!=null)
+            {
+                var arglistType=funArgList[0];
+                if (arglistType!="FUNARGLIST")
+                {
+                    return "Error: no FUNARGLIST in function call.";
+                }
+
+                var argList=funArgList[1];
+                argList.forEach(arg =>
+                    {
+                        parsedArgList.push(this.evaluateExpression(arg,localScope,globalScope));
+                    }
+                );
+            }
+
+            var retobj=new Object();
+            var ret=this.execFunctionCall(funName,parsedArgList,retobj);
+            if (typeof retobj.result=='number') return ['NUMBER',retobj.result];
+            if (typeof retobj.result=='string') return ['STRING',retobj.result];
         }
         else if ((typeof e=='object')&&(e.length>0)&&(e[0]=='VARIABLE'))
         {
@@ -105,7 +145,7 @@ class luaengine
         }
     }
 
-    execFunctionCall(fname,arglist)
+    execFunctionCall(fname,arglist,objres)
     {
         // library functions first
         if (fname=="rectfill")
@@ -152,12 +192,53 @@ class luaengine
         }
         else if (fname=="flip")
         {
-            // do nothing (for now)
+            // fixme
         }
         else if (fname=="logprint")
         {
             var msg=arglist[0][1];
             alert(msg);
+        }
+        else if (fname=="pget")
+        {
+            if (arglist.length!=2)
+            {
+                return [1,"pget requires 2 arguments."];
+            }
+
+            objres.result=0;
+
+            var x=arglist[0][1];
+            var y=arglist[1][1];
+
+            if ((x<0)||(x>this.vcDisplay.dimx-1)||(y<0)||(y>this.vcDisplay.dimy-1))
+            {
+            }
+            else
+            {
+                var p=this.vcDisplay.srcContext.getImageData(x, y, 1, 1).data; 
+                var hex = ("#" + ("000000" + this.rgbToHex(p[0], p[1], p[2])).slice(-6)).toUpperCase();
+                for (var c=0;c<this.vcDisplay.palette.length;c++)
+                {
+                    if (hex==this.vcDisplay.palette[c])
+                    {
+                        objres.result=c;
+                        break;
+                    }
+                }
+            }
+        }
+        else if (fname=="rnd")
+        {
+            // fixme
+
+            if (arglist.length!=1)
+            {
+                return [1,"rnd function call without argument."];
+            }
+
+            var rndMax=arglist[0][1];
+            objres.result=Math.floor(Math.random()*rndMax);
         }
         else
         {
@@ -169,23 +250,29 @@ class luaengine
 
     execute(instructions,localScope,globalScope,level)
     {
-        var l=instructions.length;
+        // comments are ignored by default
 
-        for (const element of instructions)
+        for (var i=0;i<instructions.length;i++)
         {
+            var element=instructions[i];
             var eltype=element[0][0];
             
-            if (eltype=="COMMENT")
+            if (eltype=="ASSIGNMENT")
             {
-                // pass
-            }
-            else if (eltype=="ASSIGNMENT")
-            {
-                var varName=element[0][1];
-                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope);
+                var varName=element[0][1][1];
+                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
                 if (level==0)
                 {
                     globalScope[varName]=varValue;
+                }
+            }
+            else if (eltype=="INCREMENT")
+            {
+                var varName=element[0][1][1];
+                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
+                if (level==0)
+                {
+                    globalScope[varName]+=varValue;
                 }
             }
             else if (eltype=="FUNCTIONCALL")
@@ -193,6 +280,7 @@ class luaengine
                 var funName=element[0][1];
                 var funArgList=element[0][2];
 
+                var parsedArgList=[];
                 if (funArgList!=null)
                 {
                     var arglistType=funArgList[0];
@@ -202,30 +290,30 @@ class luaengine
                     }
 
                     var argList=funArgList[1];
-                    var parsedArgList=[];
                     argList.forEach(arg =>
                         {
                             parsedArgList.push(this.evaluateExpression(arg,localScope,globalScope));
                         }
                     );
+                }
 
-                    var ret=this.execFunctionCall(funName,parsedArgList);
-                    if (ret[0]!=0) 
-                    {
-                        return ret[1];
-                    }
+                var retobj=new Object();
+                var ret=this.execFunctionCall(funName,parsedArgList,retobj);
+                if (ret[0]!=0) 
+                {
+                    return ret[1];
                 }
             }
             else if (eltype=="FOR")
             {
-                var cycleVariable=element[0][1];
+                var cycleVariable=element[0][1][1];
                 var cycleFrom=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
                 var cycleTo=this.evaluateExpression(element[0][3],localScope,globalScope)[1];
 
-                localScope.cycleVariable=0;
+                localScope[cycleVariable]=0;
                 for (var i=cycleFrom;i<=cycleTo;i++)
                 {
-                    localScope.cycleVariable=i;
+                    localScope[cycleVariable]=i;
                     this.execute(element[0][4],localScope,globalScope,level+1);
                 }
             }
