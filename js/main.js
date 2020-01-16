@@ -36,7 +36,7 @@ function drawPhun()
 window.onload=function()
 {
     var mehdVersion="0.8";
-    document.title="mehd v"+mehdVersion+" - the text editor of the next decade";
+    document.title="mehd v"+mehdVersion+" - the text editor that became a fantasy console";
     document.getElementById("versionSpan").innerHTML="mehd v"+mehdVersion;
     
     glbEditor=new editor("maincanvas",mehdVersion);

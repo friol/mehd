@@ -168,6 +168,24 @@ class luaengine
 
             this.vcDisplay.rectfill(x0,y0,x1,y1,palcol);
         }
+        else if (fname=="line")
+        {
+            if ((arglist.length!=2)&&(arglist.length!=3)&&(arglist.length!=4)&&(arglist.length!=5))
+            {
+                return [1,"Wrong num of args for line."];
+            }
+
+            this.vcDisplay.line(arglist);
+        }
+        else if (fname=="circfill")
+        {
+            if ((arglist.length!=2)&&(arglist.length!=3)&&(arglist.length!=4))
+            {
+                return [1,"Wrong num of args for circfill."];
+            }
+
+            this.vcDisplay.circfill(arglist);            
+        }
         else if (fname=="color")
         {
             if (arglist.length!=1)
@@ -198,6 +216,26 @@ class luaengine
         {
             var msg=arglist[0][1];
             alert(msg);
+        }
+        else if (fname=="pset")
+        {
+            if ((arglist.length!=2)&&(arglist.length!=3))
+            {
+                return [1,"pset requires 2 or 3 arguments."];
+            }
+
+            var x=arglist[0][1];
+            var y=arglist[1][1];
+
+            if ((x<0)||(x>this.vcDisplay.dimx-1)||(y<0)||(y>this.vcDisplay.dimy-1))
+            {
+            }
+            else
+            {
+                var palcol=-1;
+                if (arglist.length==3) palcol=arglist[2][1];
+                this.vcDisplay.pset(x,y,palcol);
+            }
         }
         else if (fname=="pget")
         {
@@ -239,6 +277,10 @@ class luaengine
 
             var rndMax=arglist[0][1];
             objres.result=Math.floor(Math.random()*rndMax);
+        }
+        else if (fname=="srand")
+        {
+            // fixme - do nothing for now
         }
         else
         {
