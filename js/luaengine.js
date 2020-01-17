@@ -153,6 +153,10 @@ class luaengine
             {
                 return ['NUMBER',this.evaluateExpression(e.left)[1]*this.evaluateExpression(e.right)[1]];
             }
+            else if (e.operator=="%")
+            {
+                return ['NUMBER',this.evaluateExpression(e.left)[1]%this.evaluateExpression(e.right)[1]];
+            }
         }
     }
 
@@ -290,9 +294,35 @@ class luaengine
             var rndMax=arglist[0][1];
             objres.result=Math.floor(Math.random()*rndMax);
         }
+        else if (fname=="sin")
+        {
+            if (arglist.length!=1)
+            {
+                return [1,"sin function call without argument."];
+            }
+            
+            var angle=arglist[0][1];
+            var realAngle=-angle*Math.PI*2;
+            objres.result=Math.sin(realAngle);
+        }
+        else if (fname=="cos")
+        {
+            if (arglist.length!=1)
+            {
+                return [1,"cos function call without argument."];
+            }
+            
+            var angle=arglist[0][1];
+            var realAngle=-angle*Math.PI*2;
+            objres.result=Math.cos(realAngle);
+        }
         else if (fname=="srand")
         {
             // fixme - do nothing for now
+        }
+        else if ((fname=="t")||(fname=="time"))
+        {
+            objres.result=this.vcDisplay.time();
         }
         else
         {
@@ -365,6 +395,11 @@ class luaengine
                 var cycleVariable=element[0][1][1];
                 var cycleFrom=this.evaluateExpression(element[0][2])[1];
                 var cycleTo=this.evaluateExpression(element[0][3])[1];
+                
+                var stride;
+                
+                if (element[0][5]!=null) stride=this.evaluateExpression(element[0][5])[1];
+                else stride=1;
 
                 this.level+=1;
                 this.localScope[cycleVariable]=0;

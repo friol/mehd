@@ -7,6 +7,10 @@ class vcdisplay
         this.canvas=document.getElementById(cvsid);
         this.context = this.canvas.getContext('2d');
 
+        this.picoTimer=0;
+        this.picoTicker=0;
+        this.picoUpdatesPerSecond=60;
+
         this.dimx=128;
         this.dimy=128;
 
@@ -29,6 +33,25 @@ class vcdisplay
         this.srcContext = this.srcCanvas.getContext('2d');
         this.srcContext.fillStyle=this.palette[0];
         this.srcContext.fillRect(0, 0, this.srcCanvas.width, this.srcCanvas.height);
+    }
+
+    update()
+    {
+        this.picoTicker++;
+        if (this.picoTicker>=this.picoUpdatesPerSecond)
+        {
+            this.picoTicker=0;
+            this.picoTimer+=1;
+            if (this.picoTimer>=32767)
+            {
+                this.picoTimer=0;
+            }
+        }
+    }
+
+    time()
+    {
+        return this.picoTimer;
     }
 
     circfill(arglist)

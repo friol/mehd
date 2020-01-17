@@ -73,6 +73,8 @@
             additiveOperator = "+" { return "+"; } / "-" { return "-"; }
 
             multiplicativeOperator = "*" { return "*"; } / "/" { return "/"; }
+
+            modulusOperator = "\%"
             
             additive = head:multiplicative tail:(additiveOperator multiplicative)* 
             {      
@@ -89,7 +91,7 @@
                 return result;    
             }
 
-            multiplicative = head:primary tail:(multiplicativeOperator primary)* 
+            multiplicative = head:modular tail:(multiplicativeOperator modular)* 
             {      
                 var result = head;      
                 for (var i = 0; i < tail.length; i++) 
@@ -104,7 +106,23 @@
                 return result;    
             }
 
-            primary=integerNumber/
+            modular = head:primary tail:(modulusOperator primary)* 
+            {      
+                var result = head;      
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    result = 
+                    {          
+                        operator: tail[i][0],          
+                        left:     result,          
+                        right:    tail[i][1]        
+                    };      
+                }      
+                return result;    
+            }
+
+            primary=floatNumber/
+            integerNumber/
             quotedString/
             functionCallStatement/
             variableName/
@@ -112,7 +130,7 @@
 
             /* for statement */
 
-            forStatement="for" [ ]+ vname:variableName "=" fromi:integerNumber "," toi:integerNumber [ ]+ "do" "\n" 
+            forStatement="for" [ ]+ vname:variableName "=" fromi:integerNumber "," toi:integerNumber ","? stri:integerNumber? [ ]+ "do" "\n" 
                 instrs:(instruction)* "end" 
                 {
                     var dataArray=new Array();
@@ -120,7 +138,7 @@
                     {        
                         dataArray.push([instrs[i]]);
                     }
-                    return ["FOR",vname,fromi,toi,dataArray];
+                    return ["FOR",vname,fromi,toi,dataArray,stri];
                 }
 
             functionCallStatement=funname:functionName "(" alist:arglist? ")" { return ['FUNCTIONCALL',funname,alist] }

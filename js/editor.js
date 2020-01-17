@@ -820,7 +820,8 @@ class editor
         // draw scrollbar
         this.scrollBar.draw();
 
-        // draw display
+        // update&draw display
+        this.picoDisplay.update();
         this.picoDisplay.draw();
     }
 }
