@@ -36,7 +36,15 @@
             [ \t]* iffe:ifStatement {return iffe;} /
             [ \t]* fcall:functionCallStatement {return fcall;} /
             [ \t]* increment:incrementStatement {return increment;} /
+            [ \t]* lab:labelStatement {return lab;} /
+            [ \t]* gotoLab:gotoStatement {return gotoLab;} /
             [ \t]* emptyLine
+
+            /* labels & "goto considered harmful" */
+
+            labelStatement="::" lname:labelName "::" {return lname; }
+
+            gotoStatement="goto" [ ] lname:labelName {return ['GOTO',lname] }
 
             /* increment statement */
 
@@ -51,6 +59,8 @@
             assignmentStatement=vname:variableName "=" rval:expression { return ['ASSIGNMENT',vname,rval] }
 
             variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['VARIABLE',the1var+the2var.join("")]; } 
+
+            labelName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['LABEL',the1var+the2var.join("")]; } 
 
             /* if statement */
 
@@ -141,6 +151,24 @@
                 
                 return val;
             }
+
+            floatNumber = sign:"-"? idigits:[0-9]+ "." fdigits:[0-9]+
+            {
+                var val=0;
+                var ival=parseInt(idigits.join(""), 10);
+                var fval=fdigits.join("");
+                
+                var concat=ival.toString()+"."+fval.toString();
+                    
+                val=parseFloat(concat); 
+            
+                if (sign=="-")
+                {
+                    return -val; 
+                }
+                
+                return val;
+            }            
 
             doubleQuotes="\""
 

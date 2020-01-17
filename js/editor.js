@@ -284,6 +284,8 @@ class editor
             this.lineArray.push("flip()");
             this.lineArray.push("end");
 */
+
+/*
             this.lineArray.push("-- 16 colorful bars");
             this.lineArray.push("cls(0)");
             this.lineArray.push("for c=0,15 do");
@@ -291,6 +293,17 @@ class editor
             this.lineArray.push("rectfill(0,c*8,128,c*8+8)");
             this.lineArray.push("flip()");
             this.lineArray.push("end");
+*/
+
+            this.lineArray.push("-- random quads all over the place");
+            this.lineArray.push("cls(0)");
+            this.lineArray.push("::draw::");
+            this.lineArray.push("x=rnd(128)");
+            this.lineArray.push("y=rnd(128)");
+            this.lineArray.push("c=rnd(15)");
+            this.lineArray.push("color(c)");
+            this.lineArray.push("circfill(x,y,rnd(10))");
+            this.lineArray.push("goto draw");
 
             this.lineArray.push("");
 
@@ -335,8 +348,8 @@ class editor
         else if ((cmd=="run")||(cmd=="r"))
         {
             // parse and run code
-            var res=this.theLuaEngine.parseAndRun(this.lineArray);
-            return "Result:"+res;
+            this.theLuaEngine.parseAndRun(this.lineArray);
+            return "Running.";
         }
         else if (cmd.split(" ")[0]=="theme")
         {

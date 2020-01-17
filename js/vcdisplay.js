@@ -46,10 +46,10 @@ class vcdisplay
 
         this.srcContext.beginPath();
         this.srcContext.arc(cx, cy, radius, 0, 2 * Math.PI, false);
-        this.srcContext.fillStyle = 'green';
+        this.srcContext.fillStyle = this.palette[palcol];
         this.srcContext.fill();
-        this.srcContext.lineWidth = 5;
-        this.srcContext.strokeStyle = '#003300';
+        this.srcContext.lineWidth = 1;
+        this.srcContext.strokeStyle = this.palette[palcol];
         this.srcContext.stroke();        
     }
 

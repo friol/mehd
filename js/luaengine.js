@@ -8,6 +8,13 @@ class luaengine
         this.parsetree=null;
         this.vcDisplay=vcdisplay;
 
+        this.totCycles=0;
+        this.numInstructionsPerInterval=5;
+        this.currentInstruction=0;
+        this.level=0;
+        this.localScope={};
+        this.globalScope={};
+
         try
         {
             this.parser=peg.generate(tempGrammar);
@@ -46,17 +53,21 @@ class luaengine
             }
 
             this.parsetree=this.parser.parse(program);
-            var result=this.execute(this.parsetree,[],[],0);
-            return result;
+
+            this.currentInstruction=0;
+            this.level=0;
+            this.localScope={};
+            this.globalScope={};
+    
+            this.execute(this.parsetree);
         }
         catch(e)
         {
             alert("Syntax error: ["+e.toString()+"]");
-            return 0;
         }
     }
 
-    evaluateExpression(e,localScope,globalScope)
+    evaluateExpression(e)
     {
         if (typeof e == 'number')
         {
@@ -85,7 +96,7 @@ class luaengine
                 var argList=funArgList[1];
                 argList.forEach(arg =>
                     {
-                        parsedArgList.push(this.evaluateExpression(arg,localScope,globalScope));
+                        parsedArgList.push(this.evaluateExpression(arg));
                     }
                 );
             }
@@ -101,26 +112,26 @@ class luaengine
 
             // search variable name in local/global scope
 
-            if (variableName in localScope)
+            if (variableName in this.localScope)
             {
-                if (typeof localScope[variableName]=='string')
+                if (typeof this.localScope[variableName]=='string')
                 {
-                    return ['STRING',localScope[variableName]];
+                    return ['STRING',this.localScope[variableName]];
                 }
-                else if (typeof localScope[variableName]=='number')
+                else if (typeof this.localScope[variableName]=='number')
                 {
-                    return ['NUMBER',localScope[variableName]];
+                    return ['NUMBER',this.localScope[variableName]];
                 }
             }
-            else if (variableName in globalScope)
+            else if (variableName in this.globalScope)
             {
-                if (typeof globalScope[variableName]=='string')
+                if (typeof this.globalScope[variableName]=='string')
                 {
-                    return ['STRING',globalScope[variableName]];
+                    return ['STRING',this.globalScope[variableName]];
                 }
-                else if (typeof globalScope[variableName]=='number')
+                else if (typeof this.globalScope[variableName]=='number')
                 {
-                    return ['NUMBER',globalScope[variableName]];
+                    return ['NUMBER',this.globalScope[variableName]];
                 }
             }
         }
@@ -128,19 +139,19 @@ class luaengine
         {
             if (e.operator=="+")
             {
-                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]+this.evaluateExpression(e.right,localScope,globalScope)[1]];
+                return ['NUMBER',this.evaluateExpression(e.left)[1]+this.evaluateExpression(e.right)[1]];
             }
             else if (e.operator=="-")
             {
-                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]-this.evaluateExpression(e.right,localScope,globalScope)[1]];
+                return ['NUMBER',this.evaluateExpression(e.left)[1]-this.evaluateExpression(e.right)[1]];
             }
             else if (e.operator=="*")
             {
-                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]*this.evaluateExpression(e.right,localScope,globalScope)[1]];
+                return ['NUMBER',this.evaluateExpression(e.left)[1]*this.evaluateExpression(e.right)[1]];
             }
             else if (e.operator=="\/")
             {
-                return ['NUMBER',this.evaluateExpression(e.left,localScope,globalScope)[1]*this.evaluateExpression(e.right,localScope,globalScope)[1]];
+                return ['NUMBER',this.evaluateExpression(e.left)[1]*this.evaluateExpression(e.right)[1]];
             }
         }
     }
@@ -211,6 +222,7 @@ class luaengine
         else if (fname=="flip")
         {
             // fixme
+            this.vcDisplay.draw();
         }
         else if (fname=="logprint")
         {
@@ -290,31 +302,31 @@ class luaengine
         return [0,"Ok"];
     }
 
-    execute(instructions,localScope,globalScope,level)
+    execute(instructions)
     {
-        // comments are ignored by default
+        // comments are ignored
 
-        for (var i=0;i<instructions.length;i++)
+        while (this.currentInstruction<instructions.length)
         {
-            var element=instructions[i];
+            var element=instructions[this.currentInstruction];
             var eltype=element[0][0];
             
             if (eltype=="ASSIGNMENT")
             {
                 var varName=element[0][1][1];
-                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
-                if (level==0)
+                var varValue=this.evaluateExpression(element[0][2])[1];
+                if (this.level==0)
                 {
-                    globalScope[varName]=varValue;
+                    this.globalScope[varName]=varValue;
                 }
             }
             else if (eltype=="INCREMENT")
             {
                 var varName=element[0][1][1];
-                var varValue=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
-                if (level==0)
+                var varValue=this.evaluateExpression(element[0][2])[1];
+                if (this.level==0)
                 {
-                    globalScope[varName]+=varValue;
+                    this.globalScope[varName]+=varValue;
                 }
             }
             else if (eltype=="FUNCTIONCALL")
@@ -328,13 +340,14 @@ class luaengine
                     var arglistType=funArgList[0];
                     if (arglistType!="FUNARGLIST")
                     {
-                        return "Error: no FUNARGLIST in function call.";
+                        console.log("Error: no FUNARGLIST in function call.");
+                        return;
                     }
 
                     var argList=funArgList[1];
                     argList.forEach(arg =>
                         {
-                            parsedArgList.push(this.evaluateExpression(arg,localScope,globalScope));
+                            parsedArgList.push(this.evaluateExpression(arg));
                         }
                     );
                 }
@@ -343,24 +356,45 @@ class luaengine
                 var ret=this.execFunctionCall(funName,parsedArgList,retobj);
                 if (ret[0]!=0) 
                 {
-                    return ret[1];
+                    console.log(ret[1]);
+                    return;
                 }
             }
             else if (eltype=="FOR")
             {
                 var cycleVariable=element[0][1][1];
-                var cycleFrom=this.evaluateExpression(element[0][2],localScope,globalScope)[1];
-                var cycleTo=this.evaluateExpression(element[0][3],localScope,globalScope)[1];
+                var cycleFrom=this.evaluateExpression(element[0][2])[1];
+                var cycleTo=this.evaluateExpression(element[0][3])[1];
 
-                localScope[cycleVariable]=0;
+                this.level+=1;
+                this.localScope[cycleVariable]=0;
                 for (var i=cycleFrom;i<=cycleTo;i++)
                 {
-                    localScope[cycleVariable]=i;
-                    this.execute(element[0][4],localScope,globalScope,level+1);
+                    this.localScope[cycleVariable]=i;
+                    this.execute(element[0][4]);
+                }
+                this.level-=1;
+            }
+            else if (eltype=="GOTO")
+            {
+                var gotoLabel=element[0][1][1];
+                for (var ins=0;ins<instructions.length;ins++)
+                {
+                    if ((instructions[ins][0][0]=='LABEL')&&(instructions[ins][0][1]==gotoLabel))
+                    {
+                        this.currentInstruction=ins;
+                    }
                 }
             }
-        }
 
-        return "Execution ok.";
+            this.currentInstruction+=1;
+            this.totCycles+=1;
+
+            if ((this.totCycles%this.numInstructionsPerInterval)==0)
+            {
+                window.setTimeout(this.execute.bind(this),0,instructions);
+                return;
+            }
+        }
     }
 }
