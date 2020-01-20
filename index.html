@@ -35,6 +35,7 @@
             [ \t]* fori:forStatement {return fori;} /
             [ \t]* iffe:ifStatement {return iffe;} /
             [ \t]* fcall:functionCallStatement {return fcall;} /
+            [ \t]* fdecl:functionDeclStatement {return fdecl;} /
             [ \t]* increment:incrementStatement {return increment;} /
             [ \t]* lab:labelStatement {return lab;} /
             [ \t]* gotoLab:gotoStatement {return gotoLab;} /
@@ -52,7 +53,7 @@
 
             /* comment statement */
 
-            comment="--" commentText:[ A-Za-z0-9\.\;\,\:\-\_\?\'\^\!\"\$\(\)\=\/]* { return ['COMMENT',commentText.join('')]; }
+            comment="--" commentText:[ A-Za-z0-9\.\;\,\:\-\_\?\'\^\!\"\$\(\)\=\/\#]* { return ['COMMENT',commentText.join('')]; }
 
             /* assignment statement */
 
@@ -64,9 +65,43 @@
 
             /* if statement */
 
-            ifStatement="if" [ ]+ expression rop:relop expression [ ]+ "then" "\n" instruction* "end" { return ['IF',rop] }
+            ifStatement="if" [ ]+ expr1:expression rop:ifRelop expr2:expression [ ]+ "then" "\n" ifinstrs:(instruction)* "else"? elseinstrs:(instruction)* "end" 
+            { 
+                var ifArray=new Array();
+                for (var i = 0; i < ifinstrs.length; i++)
+                {
+                    ifArray.push([ifinstrs[i]]);
+                }
 
-            relop="<"/"<="/"=="/">="/">"
+                var elseArray=new Array();
+                for (var i = 0; i < elseinstrs.length; i++)
+                {        
+                    elseArray.push([elseinstrs[i]]);
+                }
+
+                return ["IF",expr1,expr2,rop,ifArray,elseArray];
+            }
+
+            ifRelop="<"/"<\="/"\=\="/">\="/">"/"!\="
+
+            /* function declaration */
+
+            functionDeclStatement = "function" [ ]+ funname:functionName "(" alist:arglist? ")" "\n" 
+                instrs:(instruction)* "end" 
+            {
+                var dataArray=new Array();
+                for (var i = 0; i < instrs.length; i++)
+                {
+                    if (instrs[i][0].length!=0)
+                    {        
+                        dataArray.push([instrs[i]]);
+                    }
+                }
+                
+                return ["FUNDECL",funname,alist,dataArray];
+            }
+
+            /* expressions */
 
             expression=additive
 
@@ -135,8 +170,11 @@
                 {
                     var dataArray=new Array();
                     for (var i = 0; i < instrs.length; i++)
-                    {        
-                        dataArray.push([instrs[i]]);
+                    {
+                        if (instrs[i][0].length!=0)
+                        {        
+                            dataArray.push([instrs[i]]);
+                        }
                     }
                     return ["FOR",vname,fromi,toi,dataArray,stri];
                 }
@@ -190,7 +228,7 @@
 
             doubleQuotes="\""
 
-            quotedString = doubleQuotes stringCorpus:[a-zA-Z0-9 ]* doubleQuotes { return stringCorpus.join(''); }
+            quotedString = doubleQuotes stringCorpus:[a-zA-Z0-9\.\-\=\;\,\: ]* doubleQuotes { return stringCorpus.join(''); }
 
             emptyLine= "\n"
 

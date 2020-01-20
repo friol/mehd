@@ -9,8 +9,12 @@ class luaengine
         this.vcDisplay=vcdisplay;
 
         this.totCycles=0;
-        this.numInstructionsPerInterval=5;
-        this.currentInstruction=0;
+        this.numInstructionsPerInterval=32;
+
+        // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
+        // blocktype may be "I" (instruction block) and "F" (for block) - for block gets repeated
+        this.pcStack=[]; 
+
         this.level=0;
         this.localScope={};
         this.globalScope={};
@@ -54,12 +58,12 @@ class luaengine
 
             this.parsetree=this.parser.parse(program);
 
-            this.currentInstruction=0;
+            this.pcStack=[['I',this.parsetree,0,null,null,null,null,null]];
             this.level=0;
             this.localScope={};
             this.globalScope={};
     
-            this.execute(this.parsetree);
+            this.execute();
         }
         catch(e)
         {
@@ -213,6 +217,10 @@ class luaengine
 
             this.vcDisplay.setPenColor(arglist[0][1]);
         }
+        else if (fname=="pal")
+        {
+            this.vcDisplay.dopal(arglist);
+        }
         else if (fname=="cls")
         {
             var palcol=-1;
@@ -226,7 +234,7 @@ class luaengine
         else if (fname=="flip")
         {
             // fixme
-            this.vcDisplay.draw();
+            this.vcDisplay.flip();
         }
         else if (fname=="logprint")
         {
@@ -292,7 +300,7 @@ class luaengine
             }
 
             var rndMax=arglist[0][1];
-            objres.result=Math.floor(Math.random()*rndMax);
+            objres.result=Math.random()*rndMax;
         }
         else if (fname=="sin")
         {
@@ -324,6 +332,42 @@ class luaengine
         {
             objres.result=this.vcDisplay.time();
         }
+        else if (fname=="flr")
+        {
+            if (arglist.length!=1)
+            {
+                return [1,"flr requires one argument."];
+            }
+            
+            objres.result=Math.floor(arglist[0][1]);
+        }
+        else if (fname=="abs")
+        {
+            if (arglist.length!=1)
+            {
+                return [1,"abs requires one argument."];
+            }
+            
+            objres.result=Math.abs(arglist[0][1]);
+        }
+        else if (fname=="mid")
+        {
+            if (arglist.length!=3)
+            {
+                return [1,"mid requires three arguments."];
+            }
+
+            var a=arglist[0][1];
+            var b=arglist[1][1];
+            var c=arglist[2][1];
+
+            if ((a>=b)&&(a<=c)) objres.result=a;
+            if ((a>=c)&&(a<=b)) objres.result=a;
+            if ((b>=a)&&(b<=c)) objres.result=b;
+            if ((b>=c)&&(b<=a)) objres.result=b;
+            if ((c>=a)&&(c<=b)) objres.result=c;
+            if ((c>=b)&&(c<=a)) objres.result=c;
+        }
         else
         {
             return [1,"Unknown function "+fname+"."];
@@ -332,104 +376,187 @@ class luaengine
         return [0,"Ok"];
     }
 
-    execute(instructions)
+    execute()
     {
-        // comments are ignored
+        // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
+        var iType=this.pcStack[this.level][0];
+        var cycfrom,cycto,cycstride;
+        var flipped=false;
 
-        while (this.currentInstruction<instructions.length)
+        if (iType=="I")
         {
-            var element=instructions[this.currentInstruction];
-            var eltype=element[0][0];
-            
-            if (eltype=="ASSIGNMENT")
-            {
-                var varName=element[0][1][1];
-                var varValue=this.evaluateExpression(element[0][2])[1];
-                if (this.level==0)
-                {
-                    this.globalScope[varName]=varValue;
-                }
-            }
-            else if (eltype=="INCREMENT")
-            {
-                var varName=element[0][1][1];
-                var varValue=this.evaluateExpression(element[0][2])[1];
-                if (this.level==0)
-                {
-                    this.globalScope[varName]+=varValue;
-                }
-            }
-            else if (eltype=="FUNCTIONCALL")
-            {
-                var funName=element[0][1];
-                var funArgList=element[0][2];
+            cycfrom=0;
+            cycto=1;
+            cycstride=1;
+        }
+        else if (iType=="F")
+        {
+            var cycleVar=this.pcStack[this.level][5]
+            cycfrom=this.localScope[cycleVar];
+            cycto=this.pcStack[this.level][3];
+            cycstride=this.pcStack[this.level][4];
+        }
 
-                var parsedArgList=[];
-                if (funArgList!=null)
+        for (var cvar=cycfrom;cvar!=cycto;cvar+=cycstride)
+        {
+            var instructions=this.pcStack[this.level][1];
+
+            while (this.pcStack[this.level][2]<instructions.length)
+            {
+                var element=instructions[this.pcStack[this.level][2]];
+                var eltype=element[0][0];
+                
+                if (eltype=="ASSIGNMENT")
                 {
-                    var arglistType=funArgList[0];
-                    if (arglistType!="FUNARGLIST")
+                    var varName=element[0][1][1];
+                    var varValue=this.evaluateExpression(element[0][2])[1];
+                    // fixme - handle scopes correctly
+
+                    if (varName in this.globalScope)
                     {
-                        console.log("Error: no FUNARGLIST in function call.");
+                        this.globalScope[varName]=varValue;
+                    }
+                    else if (varName in this.localScope)
+                    {
+                        this.localScope[varName]=varValue;                        
+                    }
+                    else
+                    {
+                        this.globalScope[varName]=varValue;
+                    }
+                }
+                else if (eltype=="INCREMENT")
+                {
+                    var varName=element[0][1][1];
+                    var varValue=this.evaluateExpression(element[0][2])[1];
+
+                    if (varName in this.globalScope)
+                    {
+                        this.globalScope[varName]+=varValue;
+                    }
+                    else if (varName in this.localScope)
+                    {
+                        this.localScope[varName]+=varValue;                        
+                    }
+                }
+                else if (eltype=="FUNCTIONCALL")
+                {
+                    var funName=element[0][1];
+                    var funArgList=element[0][2];
+
+                    var parsedArgList=[];
+                    if (funArgList!=null)
+                    {
+                        var arglistType=funArgList[0];
+                        if (arglistType!="FUNARGLIST")
+                        {
+                            console.log("Error: no FUNARGLIST in function call.");
+                            return;
+                        }
+
+                        var argList=funArgList[1];
+                        argList.forEach(arg =>
+                            {
+                                parsedArgList.push(this.evaluateExpression(arg));
+                            }
+                        );
+                    }
+
+                    var retobj=new Object();
+                    var ret=this.execFunctionCall(funName,parsedArgList,retobj);
+                    if (ret[0]!=0) 
+                    {
+                        console.log(ret[1]);
                         return;
                     }
 
-                    var argList=funArgList[1];
-                    argList.forEach(arg =>
-                        {
-                            parsedArgList.push(this.evaluateExpression(arg));
-                        }
-                    );
+                    if (funName=="flip") flipped=true;
                 }
-
-                var retobj=new Object();
-                var ret=this.execFunctionCall(funName,parsedArgList,retobj);
-                if (ret[0]!=0) 
+                else if (eltype=="FOR")
                 {
-                    console.log(ret[1]);
+                    var cycleVariable=element[0][1][1];
+                    var cycleFrom=this.evaluateExpression(element[0][2])[1];
+                    var cycleTo=this.evaluateExpression(element[0][3])[1];
+                    
+                    var stride;
+                    if (element[0][5]!=null) stride=this.evaluateExpression(element[0][5])[1];
+                    else stride=1;
+
+                    this.pcStack[this.level][2]+=1; // increment instruction pointer for this level, so it doesn't get stuck when we exit the for loop
+                    this.totCycles+=1;
+
+                    this.level+=1;
+                    this.localScope[cycleVariable]=cycleFrom;
+                    this.pcStack.push(['F',element[0][4],0,cycleTo,stride,cycleVariable]);
+                    this.execute();
+                    
                     return;
                 }
-            }
-            else if (eltype=="FOR")
-            {
-                var cycleVariable=element[0][1][1];
-                var cycleFrom=this.evaluateExpression(element[0][2])[1];
-                var cycleTo=this.evaluateExpression(element[0][3])[1];
-                
-                var stride;
-                
-                if (element[0][5]!=null) stride=this.evaluateExpression(element[0][5])[1];
-                else stride=1;
+                else if (eltype=="IF")
+                {
+                    var expr1=this.evaluateExpression(element[0][1])[1];
+                    var expr2=this.evaluateExpression(element[0][2])[1];
+                    var relop=element[0][3];
 
-                this.level+=1;
-                this.localScope[cycleVariable]=0;
-                for (var i=cycleFrom;i<=cycleTo;i++)
-                {
-                    this.localScope[cycleVariable]=i;
-                    this.execute(element[0][4]);
-                }
-                this.level-=1;
-            }
-            else if (eltype=="GOTO")
-            {
-                var gotoLabel=element[0][1][1];
-                for (var ins=0;ins<instructions.length;ins++)
-                {
-                    if ((instructions[ins][0][0]=='LABEL')&&(instructions[ins][0][1]==gotoLabel))
+                    this.level+=1;
+
+                    if (eval(expr1+relop+expr2))
                     {
-                        this.currentInstruction=ins;
+                        this.pcStack.push(['I',element[0][4],0]);
+                    }
+                    else
+                    {
+                        this.pcStack.push(['I',element[0][5],0]);
+                    }
+
+                    this.execute();
+
+                    this.pcStack[this.level][2]+=1; // increment instruction pointer for this level, so it doesn't get stuck when we exit the for loop
+                    this.totCycles+=1;
+                    
+                    return;
+                }
+                else if (eltype=="GOTO")
+                {
+                    var gotoLabel=element[0][1][1];
+                    for (var ins=0;ins<instructions.length;ins++)
+                    {
+                        if ((instructions[ins][0][0]=='LABEL')&&(instructions[ins][0][1]==gotoLabel))
+                        {
+                            this.pcStack[this.level][2]=ins;
+                        }
                     }
                 }
-            }
 
-            this.currentInstruction+=1;
-            this.totCycles+=1;
+                this.pcStack[this.level][2]+=1; // increment instruction pointer
+                this.totCycles+=1;
 
-            if ((this.totCycles%this.numInstructionsPerInterval)==0)
+                //if ( ((this.totCycles%this.numInstructionsPerInterval)==0) || (flipped) )
+                if (flipped)
+                {
+                    window.setTimeout(this.execute.bind(this),0);
+                    return;
+                }
+            } // end of execution block cycle
+
+            this.pcStack[this.level][2]=0; // reset block of instructions IP
+
+            // if in a cycle, increment cycle variable for future calls.
+            if (iType=="F")
             {
-                window.setTimeout(this.execute.bind(this),0,instructions);
-                return;
+                this.localScope[this.pcStack[this.level][5]]+=cycstride;
             }
+        }
+
+        if (this.level>0) 
+        {
+            this.pcStack.pop(); // remove current stack level
+            this.level--; // go up one level
+            window.setTimeout(this.execute.bind(this),0);
+        }
+        else
+        {
+            // execution terminated
         }
     }
 }

@@ -271,45 +271,135 @@ class editor
 
     handleCommand(cmd)
     {
-        if (cmd=="test")
+        if (cmd.split(" ")[0]=="test")
         {
             this.lineArray=[];
-/*
-            this.lineArray.push("-- move a point along the screen diagonal");
-            this.lineArray.push("cls(0)");
-            this.lineArray.push("color(7)");
-            this.lineArray.push("for c=0,122 do");
-            this.lineArray.push("cls(0)");
-            this.lineArray.push("rectfill(c,c,c+8,c+8)");
-            this.lineArray.push("flip()");
-            this.lineArray.push("end");
-*/
 
-/*
-            this.lineArray.push("-- 16 colorful bars");
-            this.lineArray.push("cls(0)");
-            this.lineArray.push("for c=0,15 do");
-            this.lineArray.push("color(c)");
-            this.lineArray.push("rectfill(0,c*8,128,c*8+8)");
-            this.lineArray.push("flip()");
-            this.lineArray.push("end");
-*/
-
-            this.lineArray.push("-- random quads all over the place");
-            this.lineArray.push("cls(0)");
-            this.lineArray.push("::draw::");
-            this.lineArray.push("x=rnd(128)");
-            this.lineArray.push("y=rnd(128)");
-            this.lineArray.push("c=rnd(15)");
-            this.lineArray.push("color(c)");
-            this.lineArray.push("circfill(x,y,rnd(10))");
-            this.lineArray.push("goto draw");
+            if (cmd.split(" ").length!=2)
+            {
+                this.lineArray.push("-- 16 colorful bars");
+                this.lineArray.push("cls(0)");
+                this.lineArray.push("for c=0,15 do");
+                this.lineArray.push("color(c)");
+                this.lineArray.push("rectfill(0,c*8,128,c*8+8)");
+                this.lineArray.push("flip()");
+                this.lineArray.push("end");
+            }
+            else if (cmd.split(" ")[1]=="1")
+            {
+                this.lineArray.push("-- double loop test");
+                this.lineArray.push("for i=0,16 do");
+                this.lineArray.push("for j=0,16 do");
+                this.lineArray.push("color(flr(rnd(16)))");
+                this.lineArray.push("rectfill(j*8,i*8,j*8+8,i*8+8)");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+            }
+            else if (cmd.split(" ")[1]=="2")
+            {
+                this.lineArray.push("-- 10print");
+                this.lineArray.push("y=0");
+                this.lineArray.push("c=7");
+                this.lineArray.push("x=0");
+                this.lineArray.push("cls(c)");
+                this.lineArray.push("::jumphere::");
+                this.lineArray.push("if rnd(2)>1 then");
+                this.lineArray.push("line(x,y,x+c,y+c,1)");
+                this.lineArray.push("else");
+                this.lineArray.push("line(x,y+c,x+c,y,1)"); 
+                this.lineArray.push("end");
+                this.lineArray.push("x+=c");
+                this.lineArray.push("if x>128 then");
+                this.lineArray.push("x=0");
+                this.lineArray.push("y+=c");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto jumphere");
+            }
+            else if (cmd.split(" ")[1]=="3")
+            {
+                this.lineArray.push("-- sperm-like thingie");
+                this.lineArray.push("tm=0");
+                this.lineArray.push("::lab::");
+                this.lineArray.push("for c=0,128 do");
+                this.lineArray.push("cls(0)");
+                this.lineArray.push("x0=64+(8*cos(tm))");
+                this.lineArray.push("x1=64+(8*cos(tm-0.1))");
+                this.lineArray.push("x2=64+(8*cos(tm-0.2))");
+                this.lineArray.push("circfill(x0,c,16,7)");
+                this.lineArray.push("circfill(x1,c-8,8,6)");
+                this.lineArray.push("circfill(x2,c-16,4,5)");
+                this.lineArray.push("tm+=0.01");
+                this.lineArray.push("flip()");
+                this.lineArray.push("end");
+                this.lineArray.push("goto lab");
+            }
+            else if (cmd.split(" ")[1]=="4")
+            {
+                this.lineArray.push("-- tweetcart #1 - bars");
+                this.lineArray.push("a=0");
+                this.lineArray.push("tm=0");
+                this.lineArray.push("pal(13,8)");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("cls()");
+                this.lineArray.push("for p=128,0,-8 do");
+                this.lineArray.push("b=a");
+                this.lineArray.push("a=(p*0.9)+cos(tm*p)*19");
+                this.lineArray.push("k=8+((p/8)%5)");
+                this.lineArray.push("line(p,118-b,p,114-a,k+1)");
+                this.lineArray.push("line(p,128,p,123-a,k)");
+                this.lineArray.push("line(p+8,128,p+8,119-a,k)");
+                this.lineArray.push("line(p-8,118-a,p,122-a,k)");
+                this.lineArray.push("line(p+8,118-a,p,122-a,k)");
+                this.lineArray.push("line(p-8,118-a,p,114-a,k)");
+                this.lineArray.push("line(p+8,118-a,p,114-a,k)");
+                this.lineArray.push("end");
+                this.lineArray.push("tm+=0.0001");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");
+            }
+            else if (cmd.split(" ")[1]=="5")
+            {
+                this.lineArray.push("-- tweetcart #2 - DNA");
+                this.lineArray.push("u=100");
+                this.lineArray.push("f=0");
+                this.lineArray.push("tm=0");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("cls(0)");
+                this.lineArray.push("f+=1");
+                this.lineArray.push("for y=0,126,9 do");
+                this.lineArray.push("n=(y+tm*60)/u");
+                this.lineArray.push("l=64+(sin((y+f)*0.004)*22)");
+                this.lineArray.push("o=16*sin(n)");
+                this.lineArray.push("z=0.9*sin(n+0.25)");
+                this.lineArray.push("a=2");
+                this.lineArray.push("m=3 ");
+                this.lineArray.push("if z>0 then");
+                this.lineArray.push("a=8");
+                this.lineArray.push("m=1");
+                this.lineArray.push("end");
+                this.lineArray.push("line(l,y,l+o,y,a)");
+                this.lineArray.push("line(l-o,y,l,y,m)");
+                this.lineArray.push("if z>0 then");
+                this.lineArray.push("z=z*2");
+                this.lineArray.push("circfill(l-o,y,4-z,m)");
+                this.lineArray.push("circfill(l+o,y,4+z,a)");
+                this.lineArray.push("else"); 
+                this.lineArray.push("circfill(l+o,y,4+z,a)");
+                this.lineArray.push("circfill(l-o,y,4-z,m)");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("tm+=10");
+                this.lineArray.push("goto cycle");
+            }
 
             this.lineArray.push("");
 
             this.cursorx=0;
             this.cursory=this.lineArray.length-1;
-            return "Sample text uploaded."
+            return "Program uploaded."
         }
         else if (cmd=="wc")
         {

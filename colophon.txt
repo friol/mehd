@@ -3,7 +3,8 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* lua syntax scripting engine
+* (grammar): remove empty parse branches from for cycles and ifs
+* cursor right-left and insert mode
 * undo for string paste
 * properly handle multiline selections
 * pixel-art right scrollbar with dynamic center widget
@@ -13,6 +14,7 @@ TODO
 
 DONE
 
+* "chunked" LUA interpreter (to allow setInterval)
 * "configurable" number of columns (via code)
 * status bar below - cursor position row/column
 * word count
@@ -27,3 +29,46 @@ DONE
 * poor man's tabulations
 * color themes
 * scolling old-school (whole lines)
+
+TWEETCARTS I WOULD LOVE TO RUN:
+
+"infinite tunnel"
+
+c={0,1,2,8,14,15,7}
+fillp(0xa5a5)
+function _draw()
+ for w=3,68,.1 do
+  a=4/w+t()/4
+  k=145/w
+  x=64+cos(a)*k
+  y=64+sin(a)*k
+  i=35/w+2+t()*3
+  rect(x-w,y-w,x+w,y+w,f(i)*16+f(i+.5))
+ end
+end
+function f(i)
+ return c[flr(1.5+abs(6-i%12))]
+end
+
+"plasma"
+
+pal(7,2)
+pal(5,0)
+pal(6,1)
+pal(11,7)
+fillp(0xa5a5)
+::cycle::
+w=128
+k=t()/8
+for i=0,w,3 do
+for j=0,w,3 do
+y=cos((i/w)-k*2)*4-sin((i/w)+k*4)*2
+x=sin((j/w)-k*2)*4-cos((j/w)+k*4)*2
+h=(y+x)/2
+n=mid(5,7.5-h,11)
+c=mid(5,8-h,11)
+rectfill(i,j,i+2,j+2,flr(c)*16+n)
+end
+end
+flip()
+goto cycle

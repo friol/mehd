@@ -138,7 +138,7 @@ class fontmgr
     getCharCoord(x,y)
     {
         var charx=Math.floor(x/(this.fontwidth+this.multiplier));
-        var chary=Math.floor(y/(this.fontheight));
+        var chary=Math.floor(y/(this.fontheight+1));
         return [charx,chary];        
     }
 
