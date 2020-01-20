@@ -672,6 +672,41 @@ class editor
                 this.statusBar.setMode(0);
             }
         }
+        else if (e.keyCode==37)
+        {
+            // arrow left
+            if (this.editorMode==0)
+            {
+                if (this.cursorx>0)
+                {
+                    this.cursorx--;
+                }
+                else if (this.cursory>0)
+                {
+                    this.cursory-=1;
+                    this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
+                }
+            }
+        }
+        else if (e.keyCode==39)
+        {
+            // arrow right
+            if (this.editorMode==0)
+            {
+                if (this.cursorx<this.lineArray[this.cursory+this.docTopline].length)
+                {
+                    this.cursorx++;
+                }
+                else
+                {
+                    if (this.cursory<this.lineArray.length)
+                    {
+                        this.cursorx=0;
+                        this.cursory+=1;
+                    }
+                }
+            }
+        }
         else if (e.keyCode==38)
         {
             // todo: arrows
@@ -799,11 +834,39 @@ class editor
         }
         else
         {
-            var removedChar=str[str.length-1];
-            str=str.substring(0, str.length - 1);
-            this.lineArray[this.docTopline+this.cursory]=str;
-            this.cursorx--;
-            return removedChar;
+            if (this.cursorx==this.lineArray[this.cursory+this.docTopline].length)
+            {
+                var removedChar=str[str.length-1];
+                str=str.substring(0, str.length - 1);
+                this.lineArray[this.docTopline+this.cursory]=str;
+                this.cursorx--;
+                return removedChar;
+            }
+            else
+            {
+                if (this.cursorx!=0)
+                {
+                    var removedChar=str[this.cursorx-1];
+                    str=str.substring(0, this.cursorx - 1)+str.substring(this.cursorx);
+                    this.lineArray[this.docTopline+this.cursory]=str;
+                    this.cursorx--;
+                    return removedChar;
+                }
+                else
+                {
+                    // concat previous line with current one
+                    if (this.cursory!=0)
+                    {
+                        var endline=this.lineArray[this.cursory+this.docTopline];
+                        var startline=this.lineArray[this.cursory-1+this.docTopline];
+                        this.lineArray.splice(this.cursory+this.docTopline,1);
+                        this.lineArray[this.cursory-1+this.docTopline]+=endline;
+                        this.cursory--;
+                        this.cursorx=startline.length;
+                        return "";
+                    }
+                }
+            }
         }
     }
 
@@ -829,7 +892,16 @@ class editor
             this.lineArray.push("");
         }
 
-        this.lineArray[this.docTopline+this.cursory]+=ch;
+        if (this.cursorx==this.lineArray[this.docTopline+this.cursory].length)
+        {
+            this.lineArray[this.docTopline+this.cursory]+=ch;
+        }
+        else
+        {
+            var linebeg=this.lineArray[this.docTopline+this.cursory].substr(0,this.cursorx);
+            var lineend=this.lineArray[this.docTopline+this.cursory].substr(this.cursorx);
+            this.lineArray[this.docTopline+this.cursory]=linebeg+ch+lineend;
+        }
 
         if (this.lineArray[this.docTopline+this.cursory].length==this.numColumns)
         {
