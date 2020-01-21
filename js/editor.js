@@ -787,6 +787,29 @@ class editor
                 }
             }
         }
+        else if (e.keyCode==46)
+        {
+            // "canc" (delete)
+            if (this.editorMode==0)
+            {
+                if (this.cursorx<this.lineArray[this.cursory+this.docTopline].length)
+                {
+                    var prestr=this.lineArray[this.cursory+this.docTopline].substr(0,this.cursorx);
+                    var poststr=this.lineArray[this.cursory+this.docTopline].substr(this.cursorx+1);
+                    this.lineArray[this.cursory+this.docTopline]=prestr+poststr;
+                }
+                else
+                {
+                    if (this.cursory<this.lineArray.length)
+                    {
+                        var endline=this.lineArray[this.cursory+1+this.docTopline];
+                        var startline=this.lineArray[this.cursory+this.docTopline];
+                        this.lineArray.splice(this.cursory+1+this.docTopline,1);
+                        this.lineArray[this.cursory+this.docTopline]+=endline;
+                    }
+                }
+            }
+        }
         else
         {
             var charToAdd="";

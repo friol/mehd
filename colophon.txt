@@ -3,7 +3,6 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* canc
 * backspace on empty line (scroll up everything)
 * poor man's syntax highlighter
 * undo for string paste
@@ -15,6 +14,7 @@ TODO
 
 DONE
 
+* canc
 * cursor right-left and insert mode
 * (grammar): remove empty parse branches from for cycles and ifs
 * "chunked" LUA interpreter (to allow setInterval)
