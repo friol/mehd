@@ -70,13 +70,19 @@
                 var ifArray=new Array();
                 for (var i = 0; i < ifinstrs.length; i++)
                 {
-                    ifArray.push([ifinstrs[i]]);
+                    if (ifinstrs[i][0].length>0)
+                    {
+                        ifArray.push([ifinstrs[i]]);
+                    }
                 }
 
                 var elseArray=new Array();
                 for (var i = 0; i < elseinstrs.length; i++)
-                {        
-                    elseArray.push([elseinstrs[i]]);
+                {
+                    if (elseinstrs[i][0].length>0)        
+                    {
+                        elseArray.push([elseinstrs[i]]);
+                    }
                 }
 
                 return ["IF",expr1,expr2,rop,ifArray,elseArray];

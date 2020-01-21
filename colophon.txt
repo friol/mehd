@@ -3,8 +3,9 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* (grammar): remove empty parse branches from for cycles and ifs
-* cursor right-left and insert mode
+* canc
+* backspace on empty line (scroll up everything)
+* poor man's syntax highlighter
 * undo for string paste
 * properly handle multiline selections
 * pixel-art right scrollbar with dynamic center widget
@@ -14,6 +15,8 @@ TODO
 
 DONE
 
+* cursor right-left and insert mode
+* (grammar): remove empty parse branches from for cycles and ifs
 * "chunked" LUA interpreter (to allow setInterval)
 * "configurable" number of columns (via code)
 * status bar below - cursor position row/column

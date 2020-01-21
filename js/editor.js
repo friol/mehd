@@ -639,8 +639,26 @@ class editor
                     this.cursory--;
                     this.docTopline+=1;
                 }
-                this.cursorx=0;
-                this.lineArray.push("");
+
+
+                if (this.cursorx==0)
+                {
+                    this.lineArray.splice(this.cursory-1,0,"");
+                }
+                else if (this.cursorx==this.lineArray[this.cursory-1+this.docTopline].length)
+                {
+                    this.lineArray.splice(this.cursory,0,"");
+                    this.cursorx=0;
+                }
+                else
+                {
+                    var prestr=this.lineArray[this.cursory-1+this.docTopline].substr(0,this.cursorx);
+                    var poststr=this.lineArray[this.cursory-1+this.docTopline].substr(this.cursorx);
+                    this.lineArray[this.cursory-1+this.docTopline]=prestr;
+                    this.lineArray.splice(this.cursory,0,poststr);
+                    this.cursorx=0;
+                }
+                
                 this.undoManager.carriageReturn(this);
             }
             else
@@ -670,6 +688,22 @@ class editor
             {
                 this.editorMode=0;
                 this.statusBar.setMode(0);
+            }
+        }
+        else if (e.keyCode==35)
+        {
+            // end
+            if (this.editorMode==0)
+            {
+                this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
+            }
+        }
+        else if (e.keyCode==36)
+        {
+            // beg
+            if (this.editorMode==0)
+            {
+                this.cursorx=0;
             }
         }
         else if (e.keyCode==37)
@@ -709,7 +743,6 @@ class editor
         }
         else if (e.keyCode==38)
         {
-            // todo: arrows
             // arrow up
             if (this.editorMode==0)
             {
@@ -723,6 +756,11 @@ class editor
                 else
                 {
                     this.cursory--;
+                }
+
+                if (this.cursorx>this.lineArray[this.cursory+this.docTopline].length)
+                {
+                    this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
                 }
             }
         }
@@ -741,6 +779,11 @@ class editor
                     {
                         this.cursory++;
                     }
+                }
+
+                if (this.cursorx>this.lineArray[this.cursory+this.docTopline].length)
+                {
+                    this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
                 }
             }
         }
