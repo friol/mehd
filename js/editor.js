@@ -895,6 +895,7 @@ class editor
             {
                 this.cursory--;
                 this.cursorx=this.lineArray[this.docTopline+this.cursory].length;
+                this.lineArray.splice(this.cursory+1+this.docTopline,1);
                 return "\n";
             }
         }

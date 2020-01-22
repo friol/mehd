@@ -3,7 +3,8 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* backspace on empty line (scroll up everything)
+* ctrl-end
+* ctrl-beg
 * poor man's syntax highlighter
 * undo for string paste
 * properly handle multiline selections
@@ -14,6 +15,7 @@ TODO
 
 DONE
 
+* backspace on empty line (scroll up everything)
 * canc
 * cursor right-left and insert mode
 * (grammar): remove empty parse branches from for cycles and ifs
