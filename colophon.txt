@@ -3,8 +3,6 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* ctrl-end
-* ctrl-beg
 * poor man's syntax highlighter
 * undo for string paste
 * properly handle multiline selections
@@ -15,6 +13,8 @@ TODO
 
 DONE
 
+* ctrl-end
+* ctrl-beg
 * backspace on empty line (scroll up everything)
 * canc
 * cursor right-left and insert mode

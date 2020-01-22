@@ -690,20 +690,37 @@ class editor
                 this.statusBar.setMode(0);
             }
         }
-        else if (e.keyCode==35)
-        {
-            // end
-            if (this.editorMode==0)
-            {
-                this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
-            }
-        }
         else if (e.keyCode==36)
         {
             // beg
             if (this.editorMode==0)
             {
-                this.cursorx=0;
+                if (e.ctrlKey)
+                {
+                    this.cursorx=0;
+                    this.cursory=0;
+                    this.docTopline=0;        
+                }
+                else
+                {
+                    this.cursorx=0;
+                }
+            }
+        }
+        else if (e.keyCode==35)
+        {
+            // end
+            if (this.editorMode==0)
+            {
+                if (e.ctrlKey)
+                {
+                    this.cursorx=0;
+                    this.cursory=this.lineArray.length;
+                }
+                else
+                {
+                    this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
+                }
             }
         }
         else if (e.keyCode==37)
