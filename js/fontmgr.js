@@ -2,7 +2,7 @@
 
 class fontmgr
 {
-    constructor(cnvsid,fgcolor,bgcolor,selcolor)
+    constructor(cnvsid,colorPal)
     {
         this.cnvsid=cnvsid;
 
@@ -14,14 +14,15 @@ class fontmgr
         this.numLettersX=18;
         this.numLettersY=6;
 
-        this.fgcolor=fgcolor;
-        this.bgcolor=bgcolor;
-        this.selcolor=selcolor;
+        this.fgcolor=colorPal[0];
+        this.bgcolor=colorPal[1];
+        this.selcolor=colorPal[2];
 
         //
 
         this.fontCanvasArray=[];
-        this.initFontCanvasArray();
+        this.initFontCanvasArray(this.fgcolor,0);
+        this.initFontCanvasArray(colorPal[3],1); // comments color
 
         this.reverseCanvasArray=[];
         this.initReverseCanvasArray();
@@ -36,9 +37,11 @@ class fontmgr
         return [r,g,b];
     }
 
-    initFontCanvasArray()
+    initFontCanvasArray(fgcol,chsid)
     {
-        this.fontCanvasArray=[];
+        var newCharset=new Array();
+        this.fontCanvasArray.push(newCharset);
+
         var img=document.getElementById("fontImage");
 
         for (var l=0;l<this.numLettersX*this.numLettersY;l++)
@@ -64,14 +67,14 @@ class fontmgr
                 var a=data[p+3];
                 if ((data[p+0]==24)&&(data[p+1]==49)&&(data[p+2]==37))
                 {
-                    data[p+0]=this.colToRGB(this.fgcolor)[0];
-                    data[p+1]=this.colToRGB(this.fgcolor)[1];
-                    data[p+2]=this.colToRGB(this.fgcolor)[2];
+                    data[p+0]=this.colToRGB(fgcol)[0];
+                    data[p+1]=this.colToRGB(fgcol)[1];
+                    data[p+2]=this.colToRGB(fgcol)[2];
                 }
             }
 
             ctx.putImageData(idt,0,0);
-            this.fontCanvasArray.push(cvs);
+            this.fontCanvasArray[chsid].push(cvs);
         }
     }
 
@@ -178,10 +181,10 @@ class fontmgr
             alpha=1-((ctick-(csteps/2))/(csteps/2));
         }
 
-        this.drawChar(cx,cy,String.fromCharCode(127),alpha,inverted);
+        this.drawChar(cx,cy,String.fromCharCode(127),alpha,inverted,0);
     }
 
-    drawChar(px,py,ch,chalpha,chreverse)
+    drawChar(px,py,ch,chalpha,chreverse,charColorNum)
     {
         const canvas=document.getElementById(this.cnvsid);
         const context = canvas.getContext('2d');
@@ -218,7 +221,7 @@ class fontmgr
         if (!chreverse)
         {
             context.globalAlpha = chalpha;
-            var cvs=this.fontCanvasArray[charIndex];
+            var cvs=this.fontCanvasArray[charColorNum][charIndex];
             context.drawImage(cvs,px,py);            
             context.globalAlpha = 1;
         }

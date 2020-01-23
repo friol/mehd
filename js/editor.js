@@ -4,8 +4,8 @@ class editor
 {
     constructor(cnvsid,edversion)
     {
-        // theme: foreground, background, selection color
-        this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
+        // theme: foreground, background, selection color, color 0
+        this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0"];
 
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
@@ -17,7 +17,7 @@ class editor
 
         this.cnvsid=cnvsid;
         this.edVersion=edversion;
-        this.fontManager=new fontmgr(cnvsid,this.colorPalette[0],this.colorPalette[1],this.colorPalette[2]);
+        this.fontManager=new fontmgr(cnvsid,this.colorPalette);
 
         this.lineArray=[""];
         
@@ -58,6 +58,7 @@ class editor
         
         this.picoDisplay=new vcdisplay(this.cnvsid);
         this.theLuaEngine=new luaengine(this.picoDisplay);
+        this.synHighlighter=new syntaxHighlighter();
 
         // event handlers
 
@@ -1005,9 +1006,20 @@ class editor
 
     drawLine(l,row)
     {
+        var lineInfo=this.synHighlighter.highlight(l);
+        var infoPos=0;
+
         for (var ch=0;ch<l.length;ch++)
         {
-            this.fontManager.drawChar(ch,row,l[ch],1,false);
+            if ((ch>=lineInfo[infoPos][0])&&(ch<=lineInfo[infoPos][1]))
+            {
+            }
+            else
+            {
+                infoPos++;
+            }
+            
+            this.fontManager.drawChar(ch,row,l[ch],1,false,lineInfo[infoPos][2]);
         }
     }
 
