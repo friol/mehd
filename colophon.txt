@@ -3,7 +3,9 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* poor man's syntax highlighter
+* poor man's syntax highlighter - strings - maybe numbers - =, >=, etc.
+* sqrt, max
+* save&load somewhere
 * undo for string paste
 * properly handle multiline selections
 * pixel-art right scrollbar with dynamic center widget
@@ -54,26 +56,3 @@ end
 function f(i)
  return c[flr(1.5+abs(6-i%12))]
 end
-
-"plasma"
-
-pal(7,2)
-pal(5,0)
-pal(6,1)
-pal(11,7)
-fillp(0xa5a5)
-::cycle::
-w=128
-k=t()/8
-for i=0,w,3 do
-for j=0,w,3 do
-y=cos((i/w)-k*2)*4-sin((i/w)+k*4)*2
-x=sin((j/w)-k*2)*4-cos((j/w)+k*4)*2
-h=(y+x)/2
-n=mid(5,7.5-h,11)
-c=mid(5,8-h,11)
-rectfill(i,j,i+2,j+2,flr(c)*16+n)
-end
-end
-flip()
-goto cycle

@@ -139,9 +139,36 @@ class luaengine
                 }
             }
         }
+        else if ((typeof e=='object')&&(e.length>0)&&(e[0]=='ARRAYELEMENT'))
+        {
+            var arrName=e[1][1];
+            var arrIndex=this.evaluateExpression(e[2])[1];
+
+            if (arrName in this.globalScope)
+            {
+                if (typeof this.globalScope[arrName][arrIndex]=='number')
+                {
+                    return ['NUMBER',this.globalScope[arrName][arrIndex]];
+                }
+            }
+            else if (arrName in this.localScope)
+            {
+                if (typeof this.localScope[arrName][arrIndex]=='number')
+                {
+                    return ['NUMBER',this.localScope[arrName][arrIndex]];
+                }
+            }
+
+            throw("Exception: can't find array name "+arrName+" in global or local scope");
+        }
         else if (typeof e === 'object')
         {
-            if (e.operator=="+")
+            if ((e.length==3)&&(e[0]=="{"))
+            {
+                // array initialization
+                return e[1];
+            }
+            else if (e.operator=="+")
             {
                 return ['NUMBER',this.evaluateExpression(e.left)[1]+this.evaluateExpression(e.right)[1]];
             }
@@ -155,7 +182,7 @@ class luaengine
             }
             else if (e.operator=="\/")
             {
-                return ['NUMBER',this.evaluateExpression(e.left)[1]*this.evaluateExpression(e.right)[1]];
+                return ['NUMBER',this.evaluateExpression(e.left)[1]/this.evaluateExpression(e.right)[1]];
             }
             else if (e.operator=="%")
             {
@@ -408,21 +435,38 @@ class luaengine
                 
                 if (eltype=="ASSIGNMENT")
                 {
-                    var varName=element[0][1][1];
+                    var varName;
+                    var isArrayAssignment=false;
+                    var arrayIndex=0;
+
+                    if (element[0][1][0]=="ARRAYELEMENT")
+                    {
+                        isArrayAssignment=true;
+                        arrayIndex=this.evaluateExpression(element[0][1][2])[1];
+                        varName=element[0][1][1][1];
+                    }
+                    else
+                    {
+                        varName=element[0][1][1];
+                    }
+                    
                     var varValue=this.evaluateExpression(element[0][2])[1];
                     // fixme - handle scopes correctly
 
                     if (varName in this.globalScope)
                     {
-                        this.globalScope[varName]=varValue;
+                        if (!isArrayAssignment) this.globalScope[varName]=varValue;
+                        else this.globalScope[varName][arrayIndex]=varValue;
                     }
                     else if (varName in this.localScope)
                     {
-                        this.localScope[varName]=varValue;                        
+                        if (!isArrayAssignment) this.localScope[varName]=varValue;
+                        else this.localScope[varName][arrayIndex]=varValue;
                     }
                     else
                     {
-                        this.globalScope[varName]=varValue;
+                        if (!isArrayAssignment) this.globalScope[varName]=varValue;
+                        else this.globalScope[varName][arrayIndex]=varValue;
                     }
                 }
                 else if (eltype=="INCREMENT")

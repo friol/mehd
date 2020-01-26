@@ -58,8 +58,14 @@
 
             /* assignment statement */
 
-            assignmentStatement=vname:variableName "=" rval:expression { return ['ASSIGNMENT',vname,rval] }
+            assignmentStatement=lval:leftval "=" rval:expression { return ['ASSIGNMENT',lval,rval] }
 
+            leftval = arrayElement/variableName;
+
+            arrayElement = vn:vName "\[" aindex:expression "\]" { return ['ARRAYELEMENT',vn,aindex] }
+
+            vName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['VARIABLE',the1var+the2var.join("")]; } 
+            
             variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['VARIABLE',the1var+the2var.join("")]; } 
 
             labelName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['LABEL',the1var+the2var.join("")]; } 
@@ -166,9 +172,26 @@
             primary=floatNumber/
             integerNumber/
             quotedString/
+            arrayElement/
             functionCallStatement/
             variableName/
+            arrayDecl/
             "(" additive:additive ")"  { return additive; }
+
+            /* array declaration */
+
+            arrayDecl="{" arrlist:arrarglist? "}"
+
+            arrarglist = head:argument tail:("," argument)*
+            {
+                var dataArray=new Array();
+                dataArray.push(head);
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    dataArray.push(tail[i][1]);
+                }	
+                return ["ARRARGLIST",dataArray];
+            }    
 
             /* for statement */
 

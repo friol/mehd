@@ -23,6 +23,8 @@ class fontmgr
         this.fontCanvasArray=[];
         this.initFontCanvasArray(this.fgcolor,0);
         this.initFontCanvasArray(colorPal[3],1); // comments color
+        this.initFontCanvasArray(colorPal[4],2); // keywords color
+        this.initFontCanvasArray(colorPal[5],3); // lib functions color
 
         this.reverseCanvasArray=[];
         this.initReverseCanvasArray();

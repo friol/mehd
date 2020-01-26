@@ -4,12 +4,12 @@ class editor
 {
     constructor(cnvsid,edversion)
     {
-        // theme: foreground, background, selection color, color 0
-        this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0"];
+        // theme: foreground, background, selection color, color 0, color 1
+        this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
 
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
-            [186,'x','X','{'],[187,'+','*','}'],[188,',',';'],[220,'\\','|'],[189,'-','_'],
+            [186,'x','X','{','['],[187,'+','*','}',']'],[188,',',';'],[220,'\\','|'],[189,'-','_'],
             [226,'<','>'],
             [48,'0','='],[49,'1','!'],[50,'2','"'],[51,'3','£'],[52,'4','$'],[53,'5','%'],
             [54,'6','&'],[55,'7','/'],[56,'8','('],[57,'9',')']
@@ -62,7 +62,11 @@ class editor
 
         // event handlers
 
+        this.altGrPressed=false;
+
         window.addEventListener('keydown', this.handleKeyPress.bind(this));
+        window.addEventListener('keyup', this.handleKeyUp.bind(this));
+
         window.addEventListener('dblclick', this.doubleClick.bind(this));
         window.addEventListener('mousedown', this.onmousedown.bind(this));
         window.addEventListener('mouseup', this.onmouseup.bind(this));
@@ -395,6 +399,44 @@ class editor
                 this.lineArray.push("tm+=10");
                 this.lineArray.push("goto cycle");
             }
+            else if (cmd.split(" ")[1]=="6")
+            {
+                this.lineArray.push("-- tweetcart #3 - Plasma");
+                this.lineArray.push("pal(7,2)");
+                this.lineArray.push("pal(5,0)");
+                this.lineArray.push("pal(6,1)");
+                this.lineArray.push("pal(11,7)");
+                this.lineArray.push("tm=0");
+                this.lineArray.push("--fillp(0xa5a5)");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("w=128");
+                this.lineArray.push("k=t()/8");
+                this.lineArray.push("for i=0,128,8 do");
+                this.lineArray.push("for j=0,128,8 do");
+                this.lineArray.push("y=(cos((i/w)-(k*2))*4)-(sin((i/w)+k*4)*2)");
+                this.lineArray.push("x=(sin((j/w)-(k*2))*4)-(cos((j/w)+k*4)*2)");
+                this.lineArray.push("h=(y+x)/2");
+                this.lineArray.push("n=mid(5,7.5-h,11)");
+                this.lineArray.push("c=mid(5,8-h,11)");
+                this.lineArray.push("rectfill(i,j,i+6,j+6,flr(n))");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");
+            }
+            else if (cmd.split(" ")[1]=="7")
+            {
+                this.lineArray.push("c={0,1,2,8,14,15,7}");
+                this.lineArray.push("for w=3,68,1 do");
+                this.lineArray.push("a=4/w+t()/4");
+                this.lineArray.push("k=145/w");
+                this.lineArray.push("x=64+cos(a)*k");
+                this.lineArray.push("y=64+sin(a)*k");
+                this.lineArray.push("i=35/w+2+t()*3");
+                this.lineArray.push("j=flr(1.5+abs(6-(i+0.5)%12))");
+                this.lineArray.push("rectfill(x-w,y-w,x+w,y+w,c[j])");
+                this.lineArray.push("end");
+            }
 
             this.lineArray.push("");
 
@@ -590,6 +632,14 @@ class editor
         }
     }
 
+    handleKeyUp(e)
+    {
+        if (e.keyCode==17)
+        {
+            this.altGrPressed=false;
+        }
+    }
+
     handleKeyPress(e)
     {
         if (e.keyCode==8)
@@ -626,6 +676,11 @@ class editor
                 e.preventDefault();
                 return false;
             }
+        }
+        else if (e.keyCode==17)
+        {
+            this.altGrPressed=true;
+            return false;
         }
         else if (e.keyCode==13)
         {
@@ -859,14 +914,19 @@ class editor
                 {
                     if (this.keypressRemap[m][0]==e.keyCode)
                     {
-                        if (e.shiftKey && !e.getModifierState("AltGraph"))
+                        if (e.shiftKey && !this.altGrPressed)
                         {
                             charToAdd=this.keypressRemap[m][2];
                             break;
                         }
-                        else if (e.getModifierState("AltGraph"))
+                        else if (this.altGrPressed&&e.shiftKey)
                         {
                             charToAdd=this.keypressRemap[m][3];    
+                            break;
+                        }
+                        else if (this.altGrPressed&&(!e.shiftKey))
+                        {
+                            charToAdd=this.keypressRemap[m][4];    
                             break;
                         }
                         else
@@ -1011,15 +1071,20 @@ class editor
 
         for (var ch=0;ch<l.length;ch++)
         {
-            if ((ch>=lineInfo[infoPos][0])&&(ch<=lineInfo[infoPos][1]))
+            var coloured=false;
+            for (var el=0;el<lineInfo.length;el++)
             {
+                if ((ch>=lineInfo[el][0])&&(ch<=lineInfo[el][1]))                 
+                {
+                    this.fontManager.drawChar(ch,row,l[ch],1,false,lineInfo[el][2]);
+                    coloured=true;
+                }
             }
-            else
+
+            if (!coloured)
             {
-                infoPos++;
+                this.fontManager.drawChar(ch,row,l[ch],1,false,0);
             }
-            
-            this.fontManager.drawChar(ch,row,l[ch],1,false,lineInfo[infoPos][2]);
         }
     }
 
