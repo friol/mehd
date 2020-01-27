@@ -29,7 +29,8 @@ class syntaxHighlighter
             " color","color ","color",
             " flip","flip ","flip",
             " cls","cls ","cls",
-            " rnd","rnd"," flr","flr",
+            " rnd","rnd"," flr","flr", " abs","abs",
+            " max","max"," bxor","bxor",
             "logprint"
         ];
     }

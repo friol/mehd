@@ -116,11 +116,22 @@ class vcdisplay
         this.pencolor=palcol;
     }
 
-    rectfill(x0,y0,x1,y1,palcol)
+    rectfill(x0,y0,x1,y1,palcol,fillme)
     {
         if (palcol==-1) palcol=this.pencolor;
-        this.srcContext.fillStyle=this.palette[this.paletteColors[palcol]];
-        this.srcContext.fillRect(x0,y0,x1-x0,y1-y0);
+
+        if (fillme)
+        {
+            this.srcContext.fillStyle=this.palette[this.paletteColors[palcol]];
+            this.srcContext.fillRect(x0,y0,x1-x0,y1-y0);
+        }
+        else
+        {
+            this.srcContext.beginPath();
+            this.srcContext.strokeStyle=this.palette[this.paletteColors[palcol]];
+            this.srcContext.rect(x0,y0,x1-x0,y1-y0);
+            this.srcContext.stroke();
+        }
     }
 
     pset(x,y,palcol)

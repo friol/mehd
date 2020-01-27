@@ -4,6 +4,7 @@ var glbEditor;
 var lastCalledTime;
 var fps;
 var glbCounter=0;
+var glbFrameCapturer;
 
 function drawPhun()
 {
@@ -30,6 +31,12 @@ function drawPhun()
         }
     }
 
+    if (glbFrameCapturer.started)
+    {
+        var cvs=document.getElementById("maincanvas");
+        glbFrameCapturer.capturer.capture(cvs);
+    }
+
     window.requestAnimationFrame(drawPhun);
 }
 
@@ -38,7 +45,9 @@ window.onload=function()
     var mehdVersion="0.10";
     document.title="mehd v"+mehdVersion+" - fantasy editor";
     document.getElementById("versionSpan").innerHTML="mehd v"+mehdVersion;
-    
-    glbEditor=new editor("maincanvas",mehdVersion);
+
+    glbFrameCapturer=new frameExporter("maincanvas");
+    glbEditor=new editor("maincanvas",mehdVersion,glbFrameCapturer);
+
     drawPhun();
 }

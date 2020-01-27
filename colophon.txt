@@ -3,8 +3,10 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* fix themes with syntax highlighter
 * poor man's syntax highlighter - strings - maybe numbers - =, >=, etc.
-* sqrt, max
+* tab inserts tab
+* sqrt, min, max, bxor
 * save&load somewhere
 * undo for string paste
 * properly handle multiline selections
@@ -15,6 +17,7 @@ TODO
 
 DONE
 
+* capture to .gif/.webm
 * ctrl-end
 * ctrl-beg
 * backspace on empty line (scroll up everything)
@@ -36,23 +39,3 @@ DONE
 * poor man's tabulations
 * color themes
 * scolling old-school (whole lines)
-
-TWEETCARTS I WOULD LOVE TO RUN:
-
-"infinite tunnel"
-
-c={0,1,2,8,14,15,7}
-fillp(0xa5a5)
-function _draw()
- for w=3,68,.1 do
-  a=4/w+t()/4
-  k=145/w
-  x=64+cos(a)*k
-  y=64+sin(a)*k
-  i=35/w+2+t()*3
-  rect(x-w,y-w,x+w,y+w,f(i)*16+f(i+.5))
- end
-end
-function f(i)
- return c[flr(1.5+abs(6-i%12))]
-end

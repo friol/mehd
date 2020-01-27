@@ -2,7 +2,7 @@
 
 class editor
 {
-    constructor(cnvsid,edversion)
+    constructor(cnvsid,edversion,fcap)
     {
         // theme: foreground, background, selection color, color 0, color 1
         this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
@@ -18,6 +18,7 @@ class editor
         this.cnvsid=cnvsid;
         this.edVersion=edversion;
         this.fontManager=new fontmgr(cnvsid,this.colorPalette);
+        this.frameCapturer=fcap;
 
         this.lineArray=[""];
         
@@ -426,16 +427,85 @@ class editor
             }
             else if (cmd.split(" ")[1]=="7")
             {
+                // https://twitter.com/lucatron_/status/1096168653735657472
+                this.lineArray.push("-- tweetcart #4 - Infinite tunnel");
                 this.lineArray.push("c={0,1,2,8,14,15,7}");
-                this.lineArray.push("for w=3,68,1 do");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("for w=3,68,.02 do");
                 this.lineArray.push("a=4/w+t()/4");
                 this.lineArray.push("k=145/w");
                 this.lineArray.push("x=64+cos(a)*k");
                 this.lineArray.push("y=64+sin(a)*k");
                 this.lineArray.push("i=35/w+2+t()*3");
-                this.lineArray.push("j=flr(1.5+abs(6-(i+0.5)%12))");
-                this.lineArray.push("rectfill(x-w,y-w,x+w,y+w,c[j])");
+                this.lineArray.push("j=flr(1.5+abs(6-(flr(i+.5))%12))");
+                this.lineArray.push("rect(x-w,y-w,x+w,y+w,c[j])");
                 this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");
+            }
+            else if (cmd.split(" ")[1]=="8")
+            {
+                // https://twitter.com/jefrsilva/status/968646725626925056
+                this.lineArray.push("-- tweetcart #5 - snake");
+                this.lineArray.push("p=0");
+                this.lineArray.push("c={8,9,10,11,12,1,2}");
+                this.lineArray.push("::f::");
+                this.lineArray.push("cls()");
+                this.lineArray.push("for i=0,127 do");
+                this.lineArray.push("s=64+32*sin((i+p)/64)");
+                this.lineArray.push("t=c[(i%7)+1]");
+                this.lineArray.push("z=64+(i-64)/2");
+                this.lineArray.push("circfill(z,s,2,t)");
+                this.lineArray.push("line(z,s,i,s,t)");
+                this.lineArray.push("circfill(i,s,2,t)");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("p+=1");
+                this.lineArray.push("goto f");               
+            }
+            else if (cmd.split(" ")[1]=="9")
+            {
+                // https://twitter.com/_matthewsa/status/966408334914957313
+                this.lineArray.push("-- tweetcart #6 - wobbly thing");
+                this.lineArray.push("p={1,2,8,9}");
+                this.lineArray.push("::loop::");
+                this.lineArray.push("cls()");
+                this.lineArray.push("for i=0,1,0.01 do");
+                this.lineArray.push("x=64+(32+sin(t())*7*sin(8*i+t()/2))*cos(i)");
+                this.lineArray.push("y=64+(32+sin(t())*7*sin(8*i+t()/2))*sin(i)");
+                this.lineArray.push("r=2*(sin(t()/2+i*2)+1)");
+                this.lineArray.push("circfill(x,y,r+1,p[flr(4+sin(i)*cos(i)*3-0.5)])");
+                this.lineArray.push("end"); 
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto loop");                
+            }
+            else if (cmd.split(" ")[1]=="10")
+            {
+                // https://twitter.com/p01/status/1211799879351226379
+                this.lineArray.push("cls()");
+                this.lineArray.push("c={1,2,4,9,10,10,7,7,7,7}");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("a=t()/4");
+                this.lineArray.push("s=cos(a/4)");
+                this.lineArray.push("for i=0,900 do");
+                this.lineArray.push("y=rnd(129)");
+                this.lineArray.push("x=y%1*129");
+                this.lineArray.push("g=64-y");
+                this.lineArray.push("f=64-x");
+                this.lineArray.push("e=0");
+                this.lineArray.push("z=abs(g)");
+                this.lineArray.push("for h=a,a+3 do");
+                this.lineArray.push("r=16+8*cos(h/3)");
+                this.lineArray.push("u=f+48*cos(h/4)");
+                this.lineArray.push("v=g-abs(r*p(h*.9))");
+                this.lineArray.push("r=r*r-u*u-v*v");
+                this.lineArray.push("if r>0 then");
+                this.lineArray.push("e=max(e,1+r/88)");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("circfill(x,y,1,c[flr(bxor(f/z+s,y/z+a)%2*z/26+e+y%1)])");
+                this.lineArray.push("end");
+                this.lineArray.push("goto cycle");
             }
 
             this.lineArray.push("");
@@ -514,6 +584,16 @@ class editor
             this.scrollBar.setColors(this.colorPalette);
             this.scrollBar.initArrowArray();
             return "Theme changed.";
+        }
+        else if (cmd=="start capture")
+        {
+            this.frameCapturer.start();
+            return "Capture started.";
+        }
+        else if (cmd=="end capture")
+        {
+            this.frameCapturer.endAndSave();
+            return "Capture ended, saving.";
         }
         else
         {

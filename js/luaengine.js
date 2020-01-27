@@ -146,20 +146,20 @@ class luaengine
 
             if (arrName in this.globalScope)
             {
-                if (typeof this.globalScope[arrName][arrIndex]=='number')
+                if (typeof this.globalScope[arrName][arrIndex-1]=='number')
                 {
-                    return ['NUMBER',this.globalScope[arrName][arrIndex]];
+                    return ['NUMBER',this.globalScope[arrName][arrIndex-1]];
                 }
             }
             else if (arrName in this.localScope)
             {
-                if (typeof this.localScope[arrName][arrIndex]=='number')
+                if (typeof this.localScope[arrName][arrIndex-1]=='number')
                 {
-                    return ['NUMBER',this.localScope[arrName][arrIndex]];
+                    return ['NUMBER',this.localScope[arrName][arrIndex-1]];
                 }
             }
 
-            throw("Exception: can't find array name "+arrName+" in global or local scope");
+            throw("Exception: can't find array name "+arrName+" in global or local scope or index oob");
         }
         else if (typeof e === 'object')
         {
@@ -212,7 +212,26 @@ class luaengine
 
             if ((palcol<-1)||(palcol>15)) return [1,"Colors from 0 to 15 are allowed in rectfill."];
 
-            this.vcDisplay.rectfill(x0,y0,x1,y1,palcol);
+            this.vcDisplay.rectfill(x0,y0,x1,y1,palcol,true);
+        }
+        else if (fname=="rect")
+        {
+            if ((arglist.length!=5)&&(arglist.length!=4))
+            {
+                return [1,"Wrong num of args for rect."];
+            }
+
+            var x0=arglist[0][1];
+            var y0=arglist[1][1];
+            var x1=arglist[2][1];
+            var y1=arglist[3][1];
+
+            var palcol=-1;
+            if (arglist.length==5) palcol=arglist[4][1];            
+
+            if ((palcol<-1)||(palcol>15)) return [1,"Colors from 0 to 15 are allowed in rect."];
+
+            this.vcDisplay.rectfill(x0,y0,x1,y1,palcol,false);
         }
         else if (fname=="line")
         {
@@ -403,6 +422,13 @@ class luaengine
         return [0,"Ok"];
     }
 
+    isNear(v,target)
+    {
+        var epsilon=0.01;
+        if (Math.abs(target-v)<epsilon) return true;
+        else return false;
+    }
+
     execute()
     {
         // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
@@ -424,7 +450,7 @@ class luaengine
             cycstride=this.pcStack[this.level][4];
         }
 
-        for (var cvar=cycfrom;cvar!=cycto;cvar+=cycstride)
+        for (var cvar=cycfrom;!this.isNear(cvar,cycto);cvar+=cycstride)
         {
             var instructions=this.pcStack[this.level][1];
 
@@ -542,26 +568,31 @@ class luaengine
                     var expr2=this.evaluateExpression(element[0][2])[1];
                     var relop=element[0][3];
 
-                    this.level+=1;
-
                     if (eval(expr1+relop+expr2))
                     {
+                        this.level+=1;
                         this.pcStack.push(['I',element[0][4],0]);
+                        this.execute();
+                        this.pcStack[this.level][2]+=1;
+                        this.totCycles+=1;
+                        return;
                     }
                     else
                     {
-                        this.pcStack.push(['I',element[0][5],0]);
+                        if (element[0][5].length>0)
+                        {
+                            this.level+=1;
+                            this.pcStack.push(['I',element[0][5],0]);
+                            this.execute();
+                            this.pcStack[this.level][2]+=1;
+                            this.totCycles+=1;
+                            return;
+                        }
                     }
-
-                    this.execute();
-
-                    this.pcStack[this.level][2]+=1; // increment instruction pointer for this level, so it doesn't get stuck when we exit the for loop
-                    this.totCycles+=1;
-                    
-                    return;
                 }
                 else if (eltype=="GOTO")
                 {
+                    // todo: implement goto to labels that are in other levels
                     var gotoLabel=element[0][1][1];
                     for (var ins=0;ins<instructions.length;ins++)
                     {

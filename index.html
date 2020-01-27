@@ -5,7 +5,13 @@
 
         <link rel="icon" type="image/png" sizes="16x16" href="img/mehd.png">
 
+        <script src="js/lib/CCapture.min.js"></script>
+        <script src="js/lib/download.js"></script>
+        <script src="js/lib/gif.js"></script>
+        <script src="js/lib/webm-writer-0.2.4.js"></script>
+
         <script src="js/peg-0.10.0.js"></script>
+        <script src="js/frameexporter.js"></script>
         <script src="js/vcdisplay.js"></script>
         <script src="js/syntaxHighlighter.js"></script>
         <script src="js/luaengine.js"></script>
@@ -195,7 +201,9 @@
 
             /* for statement */
 
-            forStatement="for" [ ]+ vname:variableName "=" fromi:integerNumber "," toi:integerNumber ","? stri:integerNumber? [ ]+ "do" "\n" 
+            numericVal=floatNumber/integerNumber;
+
+            forStatement="for" [ ]+ vname:variableName "=" fromi:expression "," toi:expression ","? stri:expression? [ ]+ "do" "\n" 
                 instrs:(instruction)* "end" 
                 {
                     var dataArray=new Array();
@@ -238,12 +246,17 @@
                 return val;
             }
 
-            floatNumber = sign:"-"? idigits:[0-9]+ "." fdigits:[0-9]+
+            floatNumber = sign:"-"? idigits:([0-9]+)? "." fdigits:[0-9]+
             {
                 var val=0;
-                var ival=parseInt(idigits.join(""), 10);
+                var ival=0;
                 var fval=fdigits.join("");
                 
+                if (idigits)
+                {
+                    ival=parseInt(idigits.join(""), 10);
+                }
+
                 var concat=ival.toString()+"."+fval.toString();
                     
                 val=parseFloat(concat); 
