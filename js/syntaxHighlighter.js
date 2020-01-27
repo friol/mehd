@@ -30,7 +30,8 @@ class syntaxHighlighter
             " flip","flip ","flip",
             " cls","cls ","cls",
             " rnd","rnd"," flr","flr", " abs","abs",
-            " max","max"," bxor","bxor",
+            " max","max"," bxor","bxor"," min","min",
+            " sqrt","sqrt",
             "logprint"
         ];
     }

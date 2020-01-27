@@ -396,6 +396,44 @@ class luaengine
             
             objres.result=Math.abs(arglist[0][1]);
         }
+        else if (fname=="max")
+        {
+            if ((arglist.length!=1)&&(arglist.length!=2))
+            {
+                return [1,"max requires one or two arguments."];
+            }
+
+            var secondParm;
+            if (arglist.length==1) secondParm=0;
+            else secondParm=arglist[1][1];
+
+            objres.result=Math.max(arglist[0][1],secondParm);
+        }
+        else if (fname=="min")
+        {
+            if ((arglist.length!=1)&&(arglist.length!=2))
+            {
+                return [1,"min requires one or two arguments."];
+            }
+
+            var secondParm;
+            if (arglist.length==1) secondParm=0;
+            else secondParm=arglist[1][1];
+
+            objres.result=Math.min(arglist[0][1],secondParm);
+        }
+        else if (fname=="bxor")
+        {
+            if (arglist.length!=2)
+            {
+                return [1,"bxor requires two arguments."];
+            }
+        
+            var firstParm=arglist[0][1];
+            var secondParm=arglist[1][1];
+
+            objres.result=firstParm^secondParm;
+        }
         else if (fname=="mid")
         {
             if (arglist.length!=3)
@@ -413,6 +451,15 @@ class luaengine
             if ((b>=c)&&(b<=a)) objres.result=b;
             if ((c>=a)&&(c<=b)) objres.result=c;
             if ((c>=b)&&(c<=a)) objres.result=c;
+        }
+        else if (fname=="sqrt")
+        {
+            if (arglist.length!=1)
+            {
+                return [1,"sqrt requires one argument."];
+            }
+
+            objres.result=Math.sqrt(arglist[0][1]);
         }
         else
         {

@@ -484,28 +484,55 @@ class editor
                 // https://twitter.com/p01/status/1211799879351226379
                 this.lineArray.push("cls()");
                 this.lineArray.push("c={1,2,4,9,10,10,7,7,7,7}");
+                this.lineArray.push("tm=0");
                 this.lineArray.push("::cycle::");
-                this.lineArray.push("a=t()/4");
+                this.lineArray.push("a=tm/4");
                 this.lineArray.push("s=cos(a/4)");
-                this.lineArray.push("for i=0,900 do");
+                this.lineArray.push("for i=0,10 do");
                 this.lineArray.push("y=rnd(129)");
-                this.lineArray.push("x=y%1*129");
+                this.lineArray.push("x=(y%1)*129");
                 this.lineArray.push("g=64-y");
                 this.lineArray.push("f=64-x");
                 this.lineArray.push("e=0");
                 this.lineArray.push("z=abs(g)");
                 this.lineArray.push("for h=a,a+3 do");
-                this.lineArray.push("r=16+8*cos(h/3)");
-                this.lineArray.push("u=f+48*cos(h/4)");
-                this.lineArray.push("v=g-abs(r*p(h*.9))");
-                this.lineArray.push("r=r*r-u*u-v*v");
+                this.lineArray.push("r=16+(8*cos(h/3))");
+                this.lineArray.push("u=f+(48*cos(h/4))");
+                this.lineArray.push("v=g-abs(r*cos(h*.9))");
+                this.lineArray.push("r=(r*r)-(u*u)-(v*v)");
                 this.lineArray.push("if r>0 then");
-                this.lineArray.push("e=max(e,1+r/88)");
+                this.lineArray.push("e=max(e,1+(r/88))");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
-                this.lineArray.push("circfill(x,y,1,c[flr(bxor(f/z+s,y/z+a)%2*z/26+e+y%1)])");
+                this.lineArray.push("circfill(flr(x),flr(y),4,c[1+abs(flr(((bxor((f/z)+s,(y/z)+a))%2)*(z/26)+e+(y%1))%9)])");
                 this.lineArray.push("end");
-                this.lineArray.push("goto cycle");
+                this.lineArray.push("tm+=0.1");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");               
+            }
+            else if (cmd.split(" ")[1]=="11")
+            {
+                // https://twitter.com/jordi_ros/status/1221534996516823041
+                this.lineArray.push("palarr={0,2,136,8,137,9,10,135,7}");
+                this.lineArray.push("for i=0,9 do"); 
+                this.lineArray.push("pal(i,palarr[i+1])");
+                this.lineArray.push("end");                
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("cls()");
+                this.lineArray.push("for z=8,28 do");
+                this.lineArray.push("for n=0,49 do");
+                this.lineArray.push("i=n/7-3");
+                this.lineArray.push("j=(n%7)-3");
+                this.lineArray.push("w=(t()*1.2)-(z/32)+(cos(i/4)/7)+(cos(j/1)/7)");
+                this.lineArray.push("u=9*cos(w/8)");
+                this.lineArray.push("v=9*cos(w/6)");
+                this.lineArray.push("x=64+(i-u/6)*(z*1.5)+u");
+                this.lineArray.push("y=64+(j-v/5)*(z*1.5)+v");
+                this.lineArray.push("circfill(flr(x),flr(y),flr(6-(z/8)),flr((z-4)/2.8))");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");                
             }
 
             this.lineArray.push("");
@@ -563,15 +590,15 @@ class editor
 
             if (cmd.split(" ")[1]=="0")
             {
-                this.colorPalette=["#83FFC7","#19432B","#3d9ab3"];
+                this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
             }
             else if (cmd.split(" ")[1]=="1")
             {
-                this.colorPalette=["#f0f0f0","#101010","#3d9ab3"];
+                this.colorPalette=["#f0f0f0","#101010","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
             }
             else if (cmd.split(" ")[1]=="2")
             {
-                this.colorPalette=["#657b83","#fdf6e3","#cec8b5"];
+                this.colorPalette=["#657b83","#fdf6e3","#cec8b5","#c0c0c0","#f01010","#a0c010"];
             }
             else
             {
@@ -579,7 +606,12 @@ class editor
             }
 
             this.fontManager.setColors(this.colorPalette);
-            this.fontManager.initFontCanvasArray();
+
+            this.fontManager.initFontCanvasArray(this.colorPalette[0],0);
+            this.fontManager.initFontCanvasArray(this.colorPalette[3],1); // comments color
+            this.fontManager.initFontCanvasArray(this.colorPalette[4],2); // keywords color
+            this.fontManager.initFontCanvasArray(this.colorPalette[5],3); // lib functions color
+    
             this.fontManager.initReverseCanvasArray();
             this.scrollBar.setColors(this.colorPalette);
             this.scrollBar.initArrowArray();

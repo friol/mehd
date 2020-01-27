@@ -3,10 +3,9 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* fix themes with syntax highlighter
+* avoid flickering
 * poor man's syntax highlighter - strings - maybe numbers - =, >=, etc.
 * tab inserts tab
-* sqrt, min, max, bxor
 * save&load somewhere
 * undo for string paste
 * properly handle multiline selections
@@ -17,6 +16,8 @@ TODO
 
 DONE
 
+* fix themes with syntax highlighter
+* max, min, bxor, sqrt
 * capture to .gif/.webm
 * ctrl-end
 * ctrl-beg
