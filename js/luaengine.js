@@ -653,7 +653,6 @@ class luaengine
                 this.pcStack[this.level][2]+=1; // increment instruction pointer
                 this.totCycles+=1;
 
-                //if ( ((this.totCycles%this.numInstructionsPerInterval)==0) || (flipped) )
                 if (flipped)
                 {
                     window.setTimeout(this.execute.bind(this),0);
@@ -675,6 +674,7 @@ class luaengine
             this.pcStack.pop(); // remove current stack level
             this.level--; // go up one level
             window.setTimeout(this.execute.bind(this),0);
+            return;
         }
         else
         {

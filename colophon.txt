@@ -5,7 +5,6 @@ TODO
 
 * avoid flickering
 * poor man's syntax highlighter - strings - maybe numbers - =, >=, etc.
-* tab inserts tab
 * save&load somewhere
 * undo for string paste
 * properly handle multiline selections
@@ -16,6 +15,7 @@ TODO
 
 DONE
 
+* tab inserts tab
 * fix themes with syntax highlighter
 * max, min, bxor, sqrt
 * capture to .gif/.webm

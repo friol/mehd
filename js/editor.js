@@ -783,8 +783,14 @@ class editor
 
             if (this.editorMode==0)
             {
-                this.lineArray[this.docTopline+this.cursory]+="    ";
+                //this.lineArray[this.docTopline+this.cursory]+="    ";
+                //this.cursorx+=4;
+
+                var prestr=this.lineArray[this.cursory+this.docTopline].substr(0,this.cursorx);
+                var poststr=this.lineArray[this.cursory+this.docTopline].substr(this.cursorx);
+                this.lineArray[this.cursory+this.docTopline]=prestr+"    "+poststr;
                 this.cursorx+=4;
+
                 e.preventDefault();
                 return false;
             }
