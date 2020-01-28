@@ -42,7 +42,7 @@ function drawPhun()
 
 window.onload=function()
 {
-    var mehdVersion="0.10";
+    var mehdVersion="0.11";
     document.title="mehd v"+mehdVersion+" - fantasy editor";
     document.getElementById("versionSpan").innerHTML="mehd v"+mehdVersion;
 

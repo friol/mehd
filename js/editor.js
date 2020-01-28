@@ -4,8 +4,8 @@ class editor
 {
     constructor(cnvsid,edversion,fcap)
     {
-        // theme: foreground, background, selection color, color 0, color 1
-        this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
+        // theme: foreground, background, selection color, comments, keywords, functions, operators, strings, numbers
+        this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010","#f0f010","#10f010","#03b1fc"];
 
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
@@ -590,15 +590,21 @@ class editor
 
             if (cmd.split(" ")[1]=="0")
             {
-                this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
+                this.colorPalette[0]="#83FFC7";
+                this.colorPalette[1]="#19432B";
+                this.colorPalette[2]="#3d9ab3";
             }
             else if (cmd.split(" ")[1]=="1")
             {
-                this.colorPalette=["#f0f0f0","#101010","#3d9ab3","#c0c0c0","#f01010","#a0c010"];
+                this.colorPalette[0]="#f0f0f0";
+                this.colorPalette[1]="#101010";
+                this.colorPalette[2]="#3d9ab3";
             }
             else if (cmd.split(" ")[1]=="2")
             {
-                this.colorPalette=["#657b83","#fdf6e3","#cec8b5","#c0c0c0","#f01010","#a0c010"];
+                this.colorPalette[0]="#657b83";
+                this.colorPalette[1]="#fdf6e3";
+                this.colorPalette[2]="#cec8b5";
             }
             else
             {
@@ -608,9 +614,11 @@ class editor
             this.fontManager.setColors(this.colorPalette);
 
             this.fontManager.initFontCanvasArray(this.colorPalette[0],0);
-            this.fontManager.initFontCanvasArray(this.colorPalette[3],1); // comments color
-            this.fontManager.initFontCanvasArray(this.colorPalette[4],2); // keywords color
-            this.fontManager.initFontCanvasArray(this.colorPalette[5],3); // lib functions color
+    
+            for (var i=0;i<this.colorPalette.length-3;i++)
+            {
+                this.fontManager.initFontCanvasArray(this.colorPalette[i+3],i+1);
+            }
     
             this.fontManager.initReverseCanvasArray();
             this.scrollBar.setColors(this.colorPalette);
