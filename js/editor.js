@@ -514,7 +514,7 @@ class editor
             {
                 // https://twitter.com/jordi_ros/status/1221534996516823041
                 this.lineArray.push("palarr={0,2,136,8,137,9,10,135,7}");
-                this.lineArray.push("for i=0,9 do"); 
+                this.lineArray.push("for i=0,8 do"); 
                 this.lineArray.push("pal(i,palarr[i+1])");
                 this.lineArray.push("end");                
                 this.lineArray.push("::cycle::");
@@ -528,7 +528,10 @@ class editor
                 this.lineArray.push("v=9*cos(w/6)");
                 this.lineArray.push("x=64+(i-u/6)*(z*1.5)+u");
                 this.lineArray.push("y=64+(j-v/5)*(z*1.5)+v");
-                this.lineArray.push("circfill(flr(x),flr(y),flr(6-(z/8)),flr((z-4)/2.8))");
+                this.lineArray.push("rad=flr(6-(z/8))");
+                this.lineArray.push("if rad>0 then");
+                this.lineArray.push("circfill(flr(x),flr(y),rad,flr((z-4)/2.8))");
+                this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
@@ -566,6 +569,24 @@ class editor
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto cycle");
+            }
+            else if (cmd.split(" ")[1]=="13")
+            {
+                this.lineArray.push("t=0");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("cls(0)");
+                this.lineArray.push("t+=.1");
+                this.lineArray.push("for y=-64,64,3 do");
+                this.lineArray.push("d=((y%6)/3)*3");
+                this.lineArray.push("for x=-75+d,64+d,6 do");
+                this.lineArray.push("a=atan2(x,y)");
+                this.lineArray.push("r=sqrt((x*x)+(y*y))/64");
+                this.lineArray.push("c=3*r*cos((r/2)+(a*2)-(t/10))+(2*sin(t/16))");
+                this.lineArray.push("rectfill(flr(x+64),flr(y+64),flr(x+68),flr(y+65),flr(7+(c%7)))");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");                
             }
 
             this.lineArray.push("");

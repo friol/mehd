@@ -359,9 +359,10 @@ class luaengine
                 return [1,"sin function call without argument."];
             }
             
-            var angle=arglist[0][1];
-            var realAngle=-angle*Math.PI*2;
-            objres.result=Math.sin(realAngle);
+            //var angle=arglist[0][1];
+            //var realAngle=-angle*Math.PI*2;
+            //objres.result=Math.sin(realAngle);
+            objres.result=Math.sin((-arglist[0][1] * 360) * (Math.PI/180));
         }
         else if (fname=="cos")
         {
@@ -370,9 +371,10 @@ class luaengine
                 return [1,"cos function call without argument."];
             }
             
-            var angle=arglist[0][1];
-            var realAngle=-angle*Math.PI*2;
-            objres.result=Math.cos(realAngle);
+            //var angle=arglist[0][1];
+            //var realAngle=-angle*Math.PI*2;
+            //objres.result=Math.cos(realAngle);
+            objres.result=Math.cos((arglist[0][1] * 360) * (Math.PI/180));
         }
         else if (fname=="srand")
         {
@@ -465,6 +467,15 @@ class luaengine
 
             objres.result=Math.sqrt(arglist[0][1]);
         }
+        else if (fname=="atan2")
+        {
+            if (arglist.length!=2)
+            {
+                return [1,"atan2 requires two arguments."];
+            }
+
+            objres.result=Math.atan2(arglist[1][1],arglist[0][1]);
+        }
         else
         {
             return [1,"Unknown function "+fname+"."];
@@ -478,6 +489,26 @@ class luaengine
         var epsilon=0.01;
         if (Math.abs(target-v)<epsilon) return true;
         else return false;
+    }
+
+    endCycle(from,to,val)
+    {
+        if (from<to)
+        {
+            if (val>to)
+            {
+                return true;
+            }
+        }
+        else if (from>to)
+        {
+            if (val<to)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     execute()
@@ -501,7 +532,9 @@ class luaengine
             cycstride=this.pcStack[this.level][4];
         }
 
-        for (var cvar=cycfrom;!this.isNear(cvar,cycto);cvar+=cycstride)
+        //for (var cvar=cycfrom;cvar<cycto;cvar+=cycstride)
+        for (var cvar=cycfrom;!this.endCycle(cycfrom,cycto,cvar);cvar+=cycstride)
+        //for (var cvar=cycfrom;!this.isNear(cvar,cycto);cvar+=cycstride)
         {
             var instructions=this.pcStack[this.level][1];
 
@@ -680,8 +713,9 @@ class luaengine
         {
             this.pcStack.pop(); // remove current stack level
             this.level--; // go up one level
-            window.setTimeout(this.execute.bind(this),0);
-            return;
+            //window.setTimeout(this.execute.bind(this),0);
+            //return;
+            this.execute();
         }
         else
         {

@@ -34,7 +34,7 @@ class syntaxHighlighter
             " cls","cls ","cls",
             " rnd","rnd"," flr","flr", " abs","abs",
             " max","max"," bxor","bxor"," min","min",
-            " sqrt","sqrt",
+            " sqrt","sqrt", " atan2","atan2",
             "logprint"
         ];
 

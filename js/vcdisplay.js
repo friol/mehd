@@ -123,13 +123,13 @@ class vcdisplay
         if (fillme)
         {
             this.srcContext.fillStyle=this.palette[this.paletteColors[palcol]];
-            this.srcContext.fillRect(x0,y0,x1-x0,y1-y0);
+            this.srcContext.fillRect(x0,y0,x1-x0+1,y1-y0+1);
         }
         else
         {
             this.srcContext.beginPath();
             this.srcContext.strokeStyle=this.palette[this.paletteColors[palcol]];
-            this.srcContext.rect(x0,y0,x1-x0,y1-y0);
+            this.srcContext.rect(x0,y0,x1-x0+1,y1-y0+1);
             this.srcContext.stroke();
         }
     }
