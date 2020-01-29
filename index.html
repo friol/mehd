@@ -44,6 +44,7 @@
             [ \t]* fcall:functionCallStatement {return fcall;} /
             [ \t]* fdecl:functionDeclStatement {return fdecl;} /
             [ \t]* increment:incrementStatement {return increment;} /
+            [ \t]* product:productStatement {return product;} /
             [ \t]* lab:labelStatement {return lab;} /
             [ \t]* gotoLab:gotoStatement {return gotoLab;} /
             [ \t]* emptyLine
@@ -54,9 +55,11 @@
 
             gotoStatement="goto" [ ] lname:labelName {return ['GOTO',lname] }
 
-            /* increment statement */
+            /* postincrement operators statements */
 
-            incrementStatement=vname:variableName "+=" rval:expression { return ['INCREMENT',vname,rval] }
+            incrementStatement=vname:variableName "+=" rval:expression { return ['POSTINCREMENT',vname,rval,'+'] }
+            
+            productStatement=vname:variableName "*=" rval:expression { return ['POSTINCREMENT',vname,rval,'*'] }
 
             /* comment statement */
 
@@ -129,6 +132,8 @@
             multiplicativeOperator = "*" { return "*"; } / "/" { return "/"; }
 
             modulusOperator = "\%"
+
+            exponentiationOperator = "^"
             
             additive = head:multiplicative tail:(additiveOperator multiplicative)* 
             {      
@@ -145,7 +150,22 @@
                 return result;    
             }
 
-            multiplicative = head:modular tail:(multiplicativeOperator modular)* 
+            multiplicative = head:exponentiative tail:(multiplicativeOperator exponentiative)* 
+            {      
+                var result = head;      
+                for (var i = 0; i < tail.length; i++) 
+                {        
+                    result = 
+                    {          
+                        operator: tail[i][0],          
+                        left:     result,          
+                        right:    tail[i][1]        
+                    };      
+                }      
+                return result;    
+            }
+
+            exponentiative = head:modular tail:(exponentiationOperator modular)* 
             {      
                 var result = head;      
                 for (var i = 0; i < tail.length; i++) 
@@ -173,7 +193,7 @@
                     };      
                 }      
                 return result;    
-            }
+            }            
 
             primary=floatNumber/
             integerNumber/

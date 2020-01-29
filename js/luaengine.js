@@ -188,6 +188,10 @@ class luaengine
             {
                 return ['NUMBER',this.evaluateExpression(e.left)[1]%this.evaluateExpression(e.right)[1]];
             }
+            else if (e.operator=="^")
+            {
+                return ['NUMBER',this.evaluateExpression(e.left)[1]**this.evaluateExpression(e.right)[1]];
+            }
         }
     }
 
@@ -542,18 +546,21 @@ class luaengine
                         else this.globalScope[varName][arrayIndex]=varValue;
                     }
                 }
-                else if (eltype=="INCREMENT")
+                else if (eltype=="POSTINCREMENT")
                 {
                     var varName=element[0][1][1];
                     var varValue=this.evaluateExpression(element[0][2])[1];
+                    var incrOperator=element[0][3];
 
                     if (varName in this.globalScope)
                     {
-                        this.globalScope[varName]+=varValue;
+                        if (incrOperator=="+") this.globalScope[varName]+=varValue;
+                        if (incrOperator=="*") this.globalScope[varName]*=varValue;
                     }
                     else if (varName in this.localScope)
                     {
-                        this.localScope[varName]+=varValue;                        
+                        if (incrOperator=="+") this.localScope[varName]+=varValue;                        
+                        if (incrOperator=="*") this.localScope[varName]*=varValue;                        
                     }
                 }
                 else if (eltype=="FUNCTIONCALL")

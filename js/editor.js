@@ -534,6 +534,39 @@ class editor
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto cycle");                
             }
+            else if (cmd.split(" ")[1]=="12")
+            {
+                // https://twitter.com/von_rostock/status/1222315759734534145
+                this.lineArray.push("r=64");
+                this.lineArray.push("::cycle::");
+                this.lineArray.push("cls()");
+                this.lineArray.push("n=799");
+                this.lineArray.push("for j=0,1 do");
+                this.lineArray.push("for i=1,n do");
+                this.lineArray.push("p=80+(flr((i%15)/14)*20)");
+                this.lineArray.push("y=((i*2)/n)-1");
+                this.lineArray.push("s=(p*(1-(y*y)))^.5");
+                this.lineArray.push("w=(i*.764)+(t()/9)");
+                this.lineArray.push("if ((j*w)%1)<.5 then");
+                this.lineArray.push("y*=p");
+                this.lineArray.push("x=s*cos(w)");
+                this.lineArray.push("z=s*sin(w)+200");
+                this.lineArray.push("z=99/z");
+                this.lineArray.push("u=r+(x*z)");
+                this.lineArray.push("v=r+(y*z)");
+                this.lineArray.push("k=r+(((x*z)/p)*80)");
+                this.lineArray.push("l=r+(((y*z)/p)*80)");
+                this.lineArray.push("circfill(u,v,(p/10)-8,2)");
+                this.lineArray.push("line(k,l,u,v)");
+                this.lineArray.push("end");
+                this.lineArray.push("if i==j then");
+                this.lineArray.push("circfill(r,r,40,0)");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto cycle");
+            }
 
             this.lineArray.push("");
 
