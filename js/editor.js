@@ -593,6 +593,8 @@ class editor
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto _");                
             }
+            
+            // https://twitter.com/lucatron_/status/1169209940197572608
 
             this.lineArray.push("");
 

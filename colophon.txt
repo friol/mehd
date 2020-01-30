@@ -3,6 +3,7 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* logic expressions
 * avoid flickering
 * save&load somewhere
 * undo for string paste
