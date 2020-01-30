@@ -593,6 +593,27 @@ class editor
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto _");                
             }
+            else if (cmd.split(" ")[1]=="14")
+            {
+                this.lineArray.push("t=0");
+                this.lineArray.push("f=200");
+                this.lineArray.push("s=64");
+                this.lineArray.push("::_::");
+                this.lineArray.push("cls(7)");
+                this.lineArray.push("rectfill(0,s,f,f,6)");
+                this.lineArray.push("for i=0,499 do");
+                this.lineArray.push("a=((rnd(f)+t)%f)-100");
+                this.lineArray.push("y=a+.5");
+                this.lineArray.push("z=rnd(f)+3");
+                this.lineArray.push("c=a/z*f");
+                this.lineArray.push("d=y/z*f");
+                this.lineArray.push("e=2/z*f");
+                this.lineArray.push("rectfill(flr(c+s),flr(s-e),flr(d+s),flr(s+e),0)");
+                this.lineArray.push("end");
+                this.lineArray.push("t+=.005");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto _");               
+            }
             
             // https://twitter.com/lucatron_/status/1169209940197572608
 

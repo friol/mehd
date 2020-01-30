@@ -705,7 +705,8 @@ class luaengine
 
                 if (flipped)
                 {
-                    window.setTimeout(this.execute.bind(this),0);
+                    window.setTimeout(this.execute.bind(this),64);
+                    //this.execute();
                     return;
                 }
             } // end of execution block cycle
@@ -723,9 +724,9 @@ class luaengine
         {
             this.pcStack.pop(); // remove current stack level
             this.level--; // go up one level
-            window.setTimeout(this.execute.bind(this),0);
-            return;
+            window.setTimeout(this.execute.bind(this),10);
             //this.execute();
+            return;
         }
         else
         {
