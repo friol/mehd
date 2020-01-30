@@ -474,7 +474,17 @@ class luaengine
                 return [1,"atan2 requires two arguments."];
             }
 
-            objres.result=Math.atan2(arglist[1][1],arglist[0][1]);
+            if ((arglist[1][1]==0)&&(arglist[0][1]==0))
+            {
+                objres.result=0.75;
+            }
+            else
+            {
+                var atanRes=Math.atan2(arglist[1][1],-arglist[0][1]);
+                atanRes+=Math.PI;
+                atanRes/=2*Math.PI;
+                objres.result=atanRes;
+            }
         }
         else
         {
@@ -713,9 +723,9 @@ class luaengine
         {
             this.pcStack.pop(); // remove current stack level
             this.level--; // go up one level
-            //window.setTimeout(this.execute.bind(this),0);
-            //return;
-            this.execute();
+            window.setTimeout(this.execute.bind(this),0);
+            return;
+            //this.execute();
         }
         else
         {

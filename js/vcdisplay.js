@@ -171,8 +171,19 @@ class vcdisplay
         }        
     }
 
-    draw()
+    draw(dmode)
     {
-        this.context.drawImage(this.srcCanvas,this.px,this.py,this.dimx*2,this.dimy*2);
+        if (dmode==0)
+        {
+            this.px=this.canvas.width-this.dimx*2-50;
+            this.py=0;
+            this.context.drawImage(this.srcCanvas,this.px,this.py,this.dimx*2,this.dimy*2);
+        }
+        else if (dmode==1)
+        {
+            this.px=Math.floor((this.canvas.width-(this.dimx*4))/2);
+            this.py=Math.floor((this.canvas.height-(this.dimy*4))/2);
+            this.context.drawImage(this.srcCanvas,this.px,this.py,this.dimx*4,this.dimy*4);
+        }
     }
 } 

@@ -7,6 +7,8 @@ class editor
         // theme: foreground, background, selection color, comments, keywords, functions, operators, strings, numbers
         this.colorPalette=["#83FFC7","#19432B","#3d9ab3","#c0c0c0","#f01010","#a0c010","#f0f010","#10f010","#03b1fc"];
 
+        this.displayMode=0; // 0 normal, 1 bigscreen
+
         // key remap: code, normal key, shift key, altgr key
         this.keypressRemap=[[190,'.',':'],[32,' ',' '],[219,'\'','?'],
             [186,'x','X','{','['],[187,'+','*','}',']'],[188,',',';'],[220,'\\','|'],[189,'-','_'],
@@ -541,6 +543,7 @@ class editor
             {
                 // https://twitter.com/von_rostock/status/1222315759734534145
                 this.lineArray.push("r=64");
+                this.lineArray.push("tm=0");
                 this.lineArray.push("::cycle::");
                 this.lineArray.push("cls()");
                 this.lineArray.push("n=799");
@@ -549,7 +552,7 @@ class editor
                 this.lineArray.push("p=80+(flr((i%15)/14)*20)");
                 this.lineArray.push("y=((i*2)/n)-1");
                 this.lineArray.push("s=(p*(1-(y*y)))^.5");
-                this.lineArray.push("w=(i*.764)+(t()/9)");
+                this.lineArray.push("w=(i*.764)+(tm/9)");
                 this.lineArray.push("if ((j*w)%1)<.5 then");
                 this.lineArray.push("y*=p");
                 this.lineArray.push("x=s*cos(w)");
@@ -559,21 +562,23 @@ class editor
                 this.lineArray.push("v=r+(y*z)");
                 this.lineArray.push("k=r+(((x*z)/p)*80)");
                 this.lineArray.push("l=r+(((y*z)/p)*80)");
-                this.lineArray.push("circfill(u,v,(p/10)-8,2)");
-                this.lineArray.push("line(k,l,u,v)");
+                this.lineArray.push("circfill(flr(u),flr(v),flr((p/10)-8),2)");
+                this.lineArray.push("line(flr(k),flr(l),flr(u),flr(v))");
                 this.lineArray.push("end");
                 this.lineArray.push("if i==j then");
-                this.lineArray.push("circfill(r,r,40,0)");
+                this.lineArray.push("circfill(flr(r),flr(r),40,0)");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
+                this.lineArray.push("tm+=.1");
                 this.lineArray.push("goto cycle");
             }
             else if (cmd.split(" ")[1]=="13")
             {
+                // https://twitter.com/guerragames/status/1054595407152525312
                 this.lineArray.push("t=0");
-                this.lineArray.push("::cycle::");
+                this.lineArray.push("::_::");
                 this.lineArray.push("cls(0)");
                 this.lineArray.push("t+=.1");
                 this.lineArray.push("for y=-64,64,3 do");
@@ -586,13 +591,13 @@ class editor
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
-                this.lineArray.push("goto cycle");                
+                this.lineArray.push("goto _");                
             }
 
             this.lineArray.push("");
 
             this.cursorx=0;
-            this.cursory=this.lineArray.length-1;
+            this.cursory=0;
             return "Program uploaded."
         }
         else if (cmd=="wc")
@@ -688,6 +693,16 @@ class editor
         {
             this.frameCapturer.endAndSave();
             return "Capture ended, saving.";
+        }
+        else if (cmd=="bigscreen")
+        {
+            this.displayMode=1; // centered, big display
+            return "Switched to bigscreen mode.";
+        }
+        else if (cmd=="smallscreen")
+        {
+            this.displayMode=0; // normal screen
+            return "Switched to small screen mode.";
         }
         else
         {
@@ -1325,6 +1340,6 @@ class editor
 
         // update&draw display
         this.picoDisplay.update();
-        this.picoDisplay.draw();
+        this.picoDisplay.draw(this.displayMode);
     }
 }

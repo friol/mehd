@@ -77,7 +77,7 @@
             
             variableName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['VARIABLE',the1var+the2var.join("")]; } 
 
-            labelName = the1var:[a-zA-Z] the2var:[a-zA-Z0-9\$]* { return ['LABEL',the1var+the2var.join("")]; } 
+            labelName = the1var:[a-zA-Z\_] the2var:[a-zA-Z0-9\$]* { return ['LABEL',the1var+the2var.join("")]; } 
 
             /* if statement */
 
