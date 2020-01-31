@@ -501,8 +501,14 @@ class luaengine
         else return false;
     }
 
-    endCycle(from,to,val)
+    endCycle(from,to,val,iType)
     {
+        if (iType=="I")
+        {
+            if (val==0) return false;
+            return true;
+        }
+
         if (from<to)
         {
             if (val>to)
@@ -525,26 +531,26 @@ class luaengine
     {
         // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
         var iType=this.pcStack[this.level][0];
-        var cycfrom,cycto,cycstride;
+        var cycfrom,cycto,cycstride,startingVal;
         var flipped=false;
 
         if (iType=="I")
         {
+            startingVal=0;
             cycfrom=0;
             cycto=1;
             cycstride=1;
         }
         else if (iType=="F")
         {
-            var cycleVar=this.pcStack[this.level][5]
-            cycfrom=this.localScope[cycleVar];
+            var cycleVar=this.pcStack[this.level][5];
+            startingVal=this.localScope[cycleVar];
+            cycfrom=this.pcStack[this.level][6];
             cycto=this.pcStack[this.level][3];
             cycstride=this.pcStack[this.level][4];
         }
 
-        //for (var cvar=cycfrom;cvar<cycto;cvar+=cycstride)
-        for (var cvar=cycfrom;!this.endCycle(cycfrom,cycto,cvar);cvar+=cycstride)
-        //for (var cvar=cycfrom;!this.isNear(cvar,cycto);cvar+=cycstride)
+        for (var cvar=startingVal;!this.endCycle(cycfrom,cycto,cvar,iType);cvar+=cycstride)
         {
             var instructions=this.pcStack[this.level][1];
 
@@ -654,7 +660,7 @@ class luaengine
 
                     this.level+=1;
                     this.localScope[cycleVariable]=cycleFrom;
-                    this.pcStack.push(['F',element[0][4],0,cycleTo,stride,cycleVariable]);
+                    this.pcStack.push(['F',element[0][4],0,cycleTo,stride,cycleVariable,cycleFrom]);
                     this.execute();
                     
                     return;
@@ -705,7 +711,7 @@ class luaengine
 
                 if (flipped)
                 {
-                    window.setTimeout(this.execute.bind(this),64);
+                    window.setTimeout(this.execute.bind(this),0);
                     //this.execute();
                     return;
                 }
@@ -724,7 +730,7 @@ class luaengine
         {
             this.pcStack.pop(); // remove current stack level
             this.level--; // go up one level
-            window.setTimeout(this.execute.bind(this),10);
+            window.setTimeout(this.execute.bind(this),0);
             //this.execute();
             return;
         }

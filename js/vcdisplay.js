@@ -66,7 +66,9 @@ class vcdisplay
         if (arglist.length>2) radius=arglist[2][1];
         else radius=4;
 
-        if (arglist.length>3) palcol=arglist[3][1];
+        if (radius<=0) return;
+
+        if (arglist.length>3) palcol=Math.floor(arglist[3][1]);
         else palcol=this.pencolor;
 
         this.srcContext.beginPath();

@@ -23,6 +23,9 @@ class editor
         this.frameCapturer=fcap;
 
         this.lineArray=[""];
+        //this.lineArray.push("for d=0,2 do");
+        //this.lineArray.push("logprint(d)");
+        //this.lineArray.push("end");
         
         this.cursory=0;
         this.cursorx=0;
@@ -372,12 +375,11 @@ class editor
                 this.lineArray.push("-- tweetcart #2 - DNA");
                 this.lineArray.push("u=100");
                 this.lineArray.push("f=0");
-                this.lineArray.push("tm=0");
                 this.lineArray.push("::cycle::");
                 this.lineArray.push("cls(0)");
                 this.lineArray.push("f+=1");
                 this.lineArray.push("for y=0,126,9 do");
-                this.lineArray.push("n=(y+tm*60)/u");
+                this.lineArray.push("n=(y+t()*60)/u");
                 this.lineArray.push("l=64+(sin((y+f)*0.004)*22)");
                 this.lineArray.push("o=16*sin(n)");
                 this.lineArray.push("z=0.9*sin(n+0.25)");
@@ -390,7 +392,7 @@ class editor
                 this.lineArray.push("line(l,y,l+o,y,a)");
                 this.lineArray.push("line(l-o,y,l,y,m)");
                 this.lineArray.push("if z>0 then");
-                this.lineArray.push("z=z*2");
+                this.lineArray.push("z*=2");
                 this.lineArray.push("circfill(l-o,y,4-z,m)");
                 this.lineArray.push("circfill(l+o,y,4+z,a)");
                 this.lineArray.push("else"); 
@@ -399,7 +401,6 @@ class editor
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
-                this.lineArray.push("tm+=10");
                 this.lineArray.push("goto cycle");
             }
             else if (cmd.split(" ")[1]=="6")
@@ -530,10 +531,7 @@ class editor
                 this.lineArray.push("v=9*cos(w/6)");
                 this.lineArray.push("x=64+(i-u/6)*(z*1.5)+u");
                 this.lineArray.push("y=64+(j-v/5)*(z*1.5)+v");
-                this.lineArray.push("rad=flr(6-(z/8))");
-                this.lineArray.push("if rad>0 then");
-                this.lineArray.push("circfill(flr(x),flr(y),rad,flr((z-4)/2.8))");
-                this.lineArray.push("end");
+                this.lineArray.push("circfill(x,y,6-(z/8),(z-4)/2.8)");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
                 this.lineArray.push("flip()");
@@ -541,38 +539,17 @@ class editor
             }
             else if (cmd.split(" ")[1]=="12")
             {
-                // https://twitter.com/von_rostock/status/1222315759734534145
-                this.lineArray.push("r=64");
-                this.lineArray.push("tm=0");
-                this.lineArray.push("::cycle::");
-                this.lineArray.push("cls()");
-                this.lineArray.push("n=799");
-                this.lineArray.push("for j=0,1 do");
-                this.lineArray.push("for i=1,n do");
-                this.lineArray.push("p=80+(flr((i%15)/14)*20)");
-                this.lineArray.push("y=((i*2)/n)-1");
-                this.lineArray.push("s=(p*(1-(y*y)))^.5");
-                this.lineArray.push("w=(i*.764)+(tm/9)");
-                this.lineArray.push("if ((j*w)%1)<.5 then");
-                this.lineArray.push("y*=p");
-                this.lineArray.push("x=s*cos(w)");
-                this.lineArray.push("z=s*sin(w)+200");
-                this.lineArray.push("z=99/z");
-                this.lineArray.push("u=r+(x*z)");
-                this.lineArray.push("v=r+(y*z)");
-                this.lineArray.push("k=r+(((x*z)/p)*80)");
-                this.lineArray.push("l=r+(((y*z)/p)*80)");
-                this.lineArray.push("circfill(flr(u),flr(v),flr((p/10)-8),2)");
-                this.lineArray.push("line(flr(k),flr(l),flr(u),flr(v))");
-                this.lineArray.push("end");
-                this.lineArray.push("if i==j then");
-                this.lineArray.push("circfill(flr(r),flr(r),40,0)");
+                // floor effect
+                this.lineArray.push("t=0");
+                this.lineArray.push("::s::");
+                this.lineArray.push("t+=.01");
+                this.lineArray.push("for y=-64,64 do");
+                this.lineArray.push("q=16+(8*cos(t+(y/128)))");
+                this.lineArray.push("for x=-64,64 do");
+                this.lineArray.push("pset(x+64,y+64,(bxor(x/q,y/16-(t*8))%2)+1)");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
-                this.lineArray.push("end");
-                this.lineArray.push("flip()");
-                this.lineArray.push("tm+=.1");
-                this.lineArray.push("goto cycle");
+                this.lineArray.push("goto s");
             }
             else if (cmd.split(" ")[1]=="13")
             {
@@ -615,6 +592,7 @@ class editor
                 this.lineArray.push("goto _");               
             }
             
+            // https://twitter.com/von_rostock/status/1118243773937483777
             // https://twitter.com/lucatron_/status/1169209940197572608
 
             this.lineArray.push("");
