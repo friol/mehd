@@ -2,14 +2,18 @@
 
 class luaengine
 {
-    constructor(vcdisplay)
+    constructor(vcdisplay,statusBar)
     {
         var tempGrammar=document.getElementById("luaGrammar").innerText;
         this.parsetree=null;
         this.vcDisplay=vcdisplay;
+        this.statusBar=statusBar;
 
         this.totCycles=0;
         this.numInstructionsPerInterval=32;
+
+        this.executionStartTime=0;
+        this.executionEndTime=0;
 
         // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
         // blocktype may be "I" (instruction block) and "F" (for block) - for block gets repeated
@@ -63,6 +67,7 @@ class luaengine
             this.localScope={};
             this.globalScope={};
     
+            this.executionStartTime=performance.now();
             this.execute();
         }
         catch(e)
@@ -737,6 +742,13 @@ class luaengine
         else
         {
             // execution terminated
+            this.executionEndTime=performance.now();
+
+            var extime=this.executionEndTime-this.executionStartTime;
+            extime=Math.round(extime * 100) / 100;
+            var msg="Execution terminated. Spent: "+extime+" milliseconds";
+            this.statusBar.setOutputMessage(msg);
+            this.statusBar.mode=2;
         }
     }
 }

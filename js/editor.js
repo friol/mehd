@@ -63,7 +63,7 @@ class editor
         this.undoManager=new undomgr();
         
         this.picoDisplay=new vcdisplay(this.cnvsid);
-        this.theLuaEngine=new luaengine(this.picoDisplay);
+        this.theLuaEngine=new luaengine(this.picoDisplay,this.statusBar);
         this.synHighlighter=new syntaxHighlighter();
 
         // event handlers
@@ -590,6 +590,18 @@ class editor
                 this.lineArray.push("t+=.005");
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto _");               
+            }
+            else if (cmd.split(" ")[1]=="15")
+            {
+                /*
+                r,s,t=128,sin,0::_::cls(6)u=64-40*s(t)v=99-64*abs(s(t*2))t+=.005
+                for x=0,r,16 do line(x,0,x,r,2)line(0,x,r,x)end
+                for i=-29,29 do
+                for j=-29,29 do
+                d=(i*i+j*j)/r
+                if(d<6)pset(i+u+8,j+v-4,5)pset(i+u,j+v,(4*s(t)+i/16-j/32-d*s(i/1499)+flr(i/32+j/16-d*s(j/1499)))%2+7)end end
+                flip()goto
+                */                 
             }
             
             // https://twitter.com/von_rostock/status/1118243773937483777

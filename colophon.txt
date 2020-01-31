@@ -7,9 +7,8 @@ TODO
 * avoid flickering
 * save&load somewhere
 * undo for string paste
-* properly handle multiline selections
+* properly handle multiline selections (copy multiline & paste)
 * pixel-art right scrollbar with dynamic center widget
-* word wrap with text on the next line
 * load an unzoomed font and zoom it via code
 * keyboard "chords" commands
 
@@ -41,3 +40,4 @@ DONE
 * poor man's tabulations
 * color themes
 * scolling old-school (whole lines)
+* word wrap with text on the next line
