@@ -139,8 +139,9 @@ class vcdisplay
     pset(x,y,palcol)
     {
         if (palcol==-1) palcol=this.pencolor;
+        else palcol=Math.floor(palcol);
         this.srcContext.fillStyle=this.palette[this.paletteColors[palcol]];
-        this.srcContext.fillRect(x,y,1,1);
+        this.srcContext.fillRect(Math.floor(x),Math.floor(y),1,1);
     }
 
     cls(palcol)

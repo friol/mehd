@@ -47,7 +47,12 @@
             [ \t]* product:productStatement {return product;} /
             [ \t]* lab:labelStatement {return lab;} /
             [ \t]* gotoLab:gotoStatement {return gotoLab;} /
+            [ \t]* retStat:returnStatement {return retStat;} /
             [ \t]* emptyLine
+
+            /* return */
+
+            returnStatement="return" [ \t]* xpr:expression { return ['RETURN',xpr] }
 
             /* labels & "goto considered harmful" */
 

@@ -22,6 +22,7 @@ class luaengine
         this.level=0;
         this.localScope={};
         this.globalScope={};
+        this.customFunctionArray=[];
 
         try
         {
@@ -296,6 +297,30 @@ class luaengine
             var msg=arglist[0][1];
             alert(msg);
         }
+        else if (fname=="pset6") // for a spinning ball only
+        {
+            if ((arglist.length!=3)&&(arglist.length!=4))
+            {
+                return [1,"pset6 requires 3 or 4 arguments."];
+            }
+
+            var x=arglist[0][1];
+            var y=arglist[1][1];
+
+            if ((x<0)||(x>this.vcDisplay.dimx-1)||(y<0)||(y>this.vcDisplay.dimy-1))
+            {
+            }
+            else
+            {
+                var d=arglist[3][1];
+                if (d<6)
+                {
+                    var palcol=-1;
+                    if (arglist.length==4) palcol=arglist[2][1];
+                    this.vcDisplay.pset(x,y,palcol);
+                }
+            }
+        }
         else if (fname=="pset")
         {
             if ((arglist.length!=2)&&(arglist.length!=3))
@@ -493,6 +518,34 @@ class luaengine
         }
         else
         {
+            // try to find function in custom functions
+            for (var i=0;i<this.customFunctionArray.length;i++)
+            {
+                var cfunname=this.customFunctionArray[i][0][1];
+                if (cfunname==fname)
+                {
+                    // call custom function code
+                    this.level+=1;
+                    this.pcStack.push(['I',this.customFunctionArray[i][0][3],0]);
+                    for (var a=0;a<arglist.length;a++)
+                    {
+                        var vname=this.customFunctionArray[i][0][2][1][0][1];
+                        this.localScope[vname]=arglist[a][1];
+                    }
+
+                    var retval=this.execute();
+                    if (retval[0]!=-1)
+                    {
+                        objres.result=retval[1];
+                    }
+
+                    this.pcStack[this.level][2]+=1;
+
+                    this.totCycles+=1;
+                    return [0,"Ok"];
+                }
+            }
+
             return [1,"Unknown function "+fname+"."];
         }
 
@@ -709,6 +762,16 @@ class luaengine
                             this.pcStack[this.level][2]=ins;
                         }
                     }
+                }
+                else if (eltype=="FUNDECL")
+                {
+                    // store fun name - pointer to instructions
+                    this.customFunctionArray.push(element);
+                }
+                else if (eltype=="RETURN")
+                {
+                    var retVal=this.evaluateExpression(element[0][1])[1];
+                    return  [0,retVal]
                 }
 
                 this.pcStack[this.level][2]+=1; // increment instruction pointer

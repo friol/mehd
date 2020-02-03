@@ -5,6 +5,8 @@ class fontmgr
     constructor(cnvsid,colorPal)
     {
         this.cnvsid=cnvsid;
+        const canvas=document.getElementById(this.cnvsid);
+        this.context = canvas.getContext('2d');
 
         this.multiplier=4;
         this.fontwidth=5*this.multiplier;
@@ -190,8 +192,8 @@ class fontmgr
 
     drawChar(px,py,ch,chalpha,chreverse,charColorNum)
     {
-        const canvas=document.getElementById(this.cnvsid);
-        const context = canvas.getContext('2d');
+        //const canvas=document.getElementById(this.cnvsid);
+        //const context = canvas.getContext('2d');
 
         var origPx=px;
         var origPy=py;
@@ -224,15 +226,15 @@ class fontmgr
 
         if (!chreverse)
         {
-            context.globalAlpha = chalpha;
+            this.context.globalAlpha = chalpha;
             var cvs=this.fontCanvasArray[charColorNum][charIndex];
-            context.drawImage(cvs,px,py);            
-            context.globalAlpha = 1;
+            this.context.drawImage(cvs,px,py);            
+            this.context.globalAlpha = 1;
         }
         else
         {
             var cvs=this.reverseCanvasArray[charIndex];
-            context.drawImage(cvs,px,py);
+            this.context.drawImage(cvs,px,py);
         }
     }
 }

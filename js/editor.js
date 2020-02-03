@@ -22,10 +22,12 @@ class editor
         this.fontManager=new fontmgr(cnvsid,this.colorPalette);
         this.frameCapturer=fcap;
 
-        this.lineArray=[""];
-        //this.lineArray.push("for d=0,2 do");
-        //this.lineArray.push("logprint(d)");
-        //this.lineArray.push("end");
+        //this.lineArray=[""];
+        this.lineArray=[];
+        this.lineArray.push("function pippo(a)");
+        this.lineArray.push("logprint(a)");
+        this.lineArray.push("end");
+        this.lineArray.push("pippo(42)");
         
         this.cursory=0;
         this.cursorx=0;
@@ -540,6 +542,7 @@ class editor
             else if (cmd.split(" ")[1]=="12")
             {
                 // floor effect
+                this.lineArray.push("-- floor demo effect");
                 this.lineArray.push("t=0");
                 this.lineArray.push("::s::");
                 this.lineArray.push("t+=.01");
@@ -549,6 +552,7 @@ class editor
                 this.lineArray.push("pset(x+64,y+64,(bxor(x/q,y/16-(t*8))%2)+1)");
                 this.lineArray.push("end");
                 this.lineArray.push("end");
+                this.lineArray.push("flip()");
                 this.lineArray.push("goto s");
             }
             else if (cmd.split(" ")[1]=="13")
@@ -570,41 +574,38 @@ class editor
                 this.lineArray.push("flip()");
                 this.lineArray.push("goto _");                
             }
-            else if (cmd.split(" ")[1]=="14")
-            {
-                this.lineArray.push("t=0");
-                this.lineArray.push("f=200");
-                this.lineArray.push("s=64");
-                this.lineArray.push("::_::");
-                this.lineArray.push("cls(7)");
-                this.lineArray.push("rectfill(0,s,f,f,6)");
-                this.lineArray.push("for i=0,499 do");
-                this.lineArray.push("a=((rnd(f)+t)%f)-100");
-                this.lineArray.push("y=a+.5");
-                this.lineArray.push("z=rnd(f)+3");
-                this.lineArray.push("c=a/z*f");
-                this.lineArray.push("d=y/z*f");
-                this.lineArray.push("e=2/z*f");
-                this.lineArray.push("rectfill(flr(c+s),flr(s-e),flr(d+s),flr(s+e),0)");
-                this.lineArray.push("end");
-                this.lineArray.push("t+=.005");
-                this.lineArray.push("flip()");
-                this.lineArray.push("goto _");               
-            }
             else if (cmd.split(" ")[1]=="15")
             {
-                /*
-                r,s,t=128,sin,0::_::cls(6)u=64-40*s(t)v=99-64*abs(s(t*2))t+=.005
-                for x=0,r,16 do line(x,0,x,r,2)line(0,x,r,x)end
-                for i=-29,29 do
-                for j=-29,29 do
-                d=(i*i+j*j)/r
-                if(d<6)pset(i+u+8,j+v-4,5)pset(i+u,j+v,(4*s(t)+i/16-j/32-d*s(i/1499)+flr(i/32+j/16-d*s(j/1499)))%2+7)end end
-                flip()goto
-                */                 
+                // https://twitter.com/von_rostock/status/1118243773937483777
+                this.lineArray.push("-- amigah! ball");
+                this.lineArray.push("r=128");
+                this.lineArray.push("t=0");
+                this.lineArray.push("::_::");
+                this.lineArray.push("pal(6,6)");
+                this.lineArray.push("cls(6)");
+                this.lineArray.push("u=64-40*sin(t)");
+                this.lineArray.push("v=99-64*abs(sin(t*2))");
+                this.lineArray.push("t+=.005");
+                this.lineArray.push("for x=0,r,16 do");
+                this.lineArray.push("line(x,0,x,r,2)");
+                this.lineArray.push("line(0,x,r,x)");
+                this.lineArray.push("end");
+                this.lineArray.push("pal(6,8)");
+                this.lineArray.push("for i=-29,29 do");
+                this.lineArray.push("for j=-29,29 do");
+                this.lineArray.push("d=((i*i)+(j*j))/r");
+                this.lineArray.push("pal(5,5)");
+                this.lineArray.push("if d<6 then");
+                this.lineArray.push("pset(i+u+8,j+v-4,5)");
+                this.lineArray.push("pal(5,7)");
+                this.lineArray.push("pset6(i+u,j+v,7+((4*sin(t)+i/16-j/32-d*sin(i/1499)+abs(flr(i/32+j/16-d*sin(j/1499))))%2),d)");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("end");
+                this.lineArray.push("flip()");
+                this.lineArray.push("goto _");
             }
             
-            // https://twitter.com/von_rostock/status/1118243773937483777
             // https://twitter.com/lucatron_/status/1169209940197572608
 
             this.lineArray.push("");
