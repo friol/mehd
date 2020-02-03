@@ -22,12 +22,12 @@ class editor
         this.fontManager=new fontmgr(cnvsid,this.colorPalette);
         this.frameCapturer=fcap;
 
-        //this.lineArray=[""];
-        this.lineArray=[];
-        this.lineArray.push("function pippo(a)");
-        this.lineArray.push("logprint(a)");
-        this.lineArray.push("end");
-        this.lineArray.push("pippo(42)");
+        this.lineArray=[""];
+        //this.lineArray=[];
+        //this.lineArray.push("function pippo(a)");
+        //this.lineArray.push("logprint(a)");
+        //this.lineArray.push("end");
+        //this.lineArray.push("pippo(42)");
         
         this.cursory=0;
         this.cursorx=0;
@@ -41,6 +41,8 @@ class editor
         this.numRows=22;
 
         this.editorMode=0; // 0 - inserting text, 1 - command mode
+        this.commandList=[]; // list of commands for the command mode
+        this.commandPointer=0;
 
         this.copyBuffer="";
         this.dragging=false;
@@ -612,6 +614,9 @@ class editor
 
             this.cursorx=0;
             this.cursory=0;
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Program uploaded."
         }
         else if (cmd=="wc")
@@ -619,6 +624,9 @@ class editor
             // wordcount
             var wc=0;
             wc=this.countWords();
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Word count: "+wc.toString();
         }
         else if (cmd=="cc")
@@ -626,32 +634,48 @@ class editor
             // char count
             var cc=0;
             cc=this.countChars();
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Char count: "+cc.toString();
         }
+/*        
         else if ((cmd=="save")||(cmd=="s"))
         {
             // downloads the text in a .txt file
             var text="";
             this.lineArray.forEach(element => text+=element+'\n');
             this.download("mehd.txt",text);
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "File saved.";
         }
+*/
         else if ((cmd=="clear")||(cmd=="cls"))
         {
             // wipes out your text
             this.lineArray=[];
             this.cursorx=0;
             this.cursory=0;
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Text wiped out.";
         }
         else if ((cmd=="ver")||(cmd=="v"))
         {
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Mehd version "+this.edVersion;
         }
         else if ((cmd=="run")||(cmd=="r"))
         {
             // parse and run code
             this.theLuaEngine.parseAndRun(this.lineArray);
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Running.";
         }
         else if (cmd.split(" ")[0]=="theme")
@@ -681,6 +705,8 @@ class editor
             }
             else
             {
+                this.commandList.push(cmd);
+                this.commandPointer=this.commandList.length-1;
                 return "Valid themes: 0, 1 or 2.";
             }
 
@@ -696,27 +722,76 @@ class editor
             this.fontManager.initReverseCanvasArray();
             this.scrollBar.setColors(this.colorPalette);
             this.scrollBar.initArrowArray();
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Theme changed.";
         }
         else if (cmd=="start capture")
         {
             this.frameCapturer.start();
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Capture started.";
         }
         else if (cmd=="end capture")
         {
             this.frameCapturer.endAndSave();
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Capture ended, saving.";
         }
         else if (cmd=="bigscreen")
         {
             this.displayMode=1; // centered, big display
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Switched to bigscreen mode.";
         }
         else if (cmd=="smallscreen")
         {
             this.displayMode=0; // normal screen
+
+            this.commandList.push(cmd);
+            this.commandPointer=this.commandList.length-1;
             return "Switched to small screen mode.";
+        }
+        else if (cmd.split(" ")[0]=="save")
+        {
+            if (cmd.split(" ").length!=2)
+            {
+                return "No filename specified.";
+            }
+
+            var quotedFname=cmd.split(" ")[1];
+            if (quotedFname.length<3)
+            {
+                return "Filename should be quoted and not empty.";
+            }
+
+            quotedFname=quotedFname.replace(/\"/g,"");
+
+            return this.saveFile(quotedFname);
+        }
+        else if (cmd.split(" ")[0]=="load")
+        {
+            if (cmd.split(" ").length!=2)
+            {
+                return "No filename specified.";
+            }
+            
+            var quotedFname=cmd.split(" ")[1];
+            if (quotedFname.length<3)
+            {
+                return "Filename should be quoted and not empty.";
+            }
+
+            quotedFname=quotedFname.replace(/\"/g,"");
+
+            return this.loadFile(quotedFname);
         }
         else
         {
@@ -724,6 +799,16 @@ class editor
         }
 
         return ""; // no cmd
+    }
+
+    loadFile(fname)
+    {
+        
+    }
+
+    saveFile(fname)
+    {
+
     }
 
     copyCurrentSelection()
@@ -1045,6 +1130,21 @@ class editor
                     this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
                 }
             }
+            else
+            {
+                if (this.commandList.length>0)
+                {
+                    if (this.commandPointer>=0)
+                    {
+                        this.statusBar.currentCommand=this.commandList[this.commandPointer];
+                        this.statusBar.cursorPosx=this.statusBar.currentCommand.length+1;
+                        if (this.commandPointer>0)
+                        {
+                            this.commandPointer--;
+                        }
+                    }
+                }
+            }
         }
         else if (e.keyCode==40)
         {
@@ -1067,6 +1167,23 @@ class editor
                 {
                     this.cursorx=this.lineArray[this.cursory+this.docTopline].length;
                 }
+            }
+            else
+            {
+                if (this.commandList.length>0)
+                {
+                    if (this.commandPointer<this.commandList.length-1)
+                    {
+                        this.commandPointer++;
+                        this.statusBar.currentCommand=this.commandList[this.commandPointer];
+                        this.statusBar.cursorPosx=this.statusBar.currentCommand.length+1;
+                        if (this.commandPointer==(this.commandList.length-1))
+                        {
+                            this.commandPointer--;
+                        }
+                    }
+                }
+
             }
         }
         else if (e.keyCode==46)

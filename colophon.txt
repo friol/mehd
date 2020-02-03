@@ -3,9 +3,9 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* save&load somewhere
 * logic expressions
 * avoid flickering
-* save&load somewhere
 * undo for string paste
 * properly handle multiline selections (copy multiline & paste)
 * pixel-art right scrollbar with dynamic center widget
@@ -14,6 +14,7 @@ TODO
 
 DONE
 
+* command history in status bar
 * poor man's syntax highlighter - strings - numbers - =, >=, etc.
 * tab inserts tab
 * fix themes with syntax highlighter
