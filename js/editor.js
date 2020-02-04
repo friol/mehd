@@ -803,16 +803,27 @@ class editor
 
     loadFile(fname)
     {
+        var thisInstance=this;
         $.ajax({
             type: "POST",
             url: '/mehd/loadProgram.php',
             data: { programName:fname },
-            dataType: "xml",
+            //dataType: "xml",
             success: function(data)
             {
-                var xmlDoc = $.parseXML(data);
-                var $xml = $( xmlDoc );
-                alert($xml);        
+                var result = $(data).find("program").text();
+
+                thisInstance.lineArray=[];
+                var splittedRes=result.split("\n");
+                for (var s=0;s<splittedRes.length;s++)
+                {
+                    thisInstance.lineArray.push(splittedRes[s]);
+                } 
+
+                thisInstance.lineArray.push("");
+
+                thisInstance.cursorx=0;
+                thisInstance.cursory=0;
             }
         });
         
@@ -824,11 +835,12 @@ class editor
         var text="";
         this.lineArray.forEach(element => text+=element+'\n');
 
+        var thisInstance=this;
         $.ajax({
             type: "POST",
             url: '/mehd/saveProgram.php',
             data: { progName:fname, progText:text },
-            dataType: "xml",
+            //dataType: "xml",
             success: function(data)
             {
                 var xmlDoc = $.parseXML(data);
@@ -836,15 +848,21 @@ class editor
         
                 $xml.find("results").each(function() 
                 {
-                    var rez=$(this).find("result").text();
+                    var rez=$(thisInstance).find("result").text();
                     if (rez=="OK")
                     {
+                        thisInstance.statusBar.setStatus("File saved.");
                     }
                     else
                     {
                         var err=$(this).find("message").text();
+                        thisInstance.statusBar.setStatus("Error saving file.");
                     }
                 });
+            },
+            error: function (jqXHR, exception)
+            {
+                thisInstance.statusBar.setStatus("Error saving file.");
             }
         });
 

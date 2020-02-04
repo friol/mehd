@@ -28,8 +28,15 @@ $proggieName=$_POST["progName"];
 $proggieText=$_POST["progText"];
 
 $fp = fopen('savedir/' . $proggieName, 'w');
-fwrite($fp, $proggieText);
-fclose($fp);
+if (!$fp)
+{
+	returnXML("KO","Cannot save program.");
+}
+else
+{
+	fwrite($fp, $proggieText);
+	fclose($fp);
 
-returnXML("OK","Program saved.");
+	returnXML("OK","Program saved.");
+}
 ?>
