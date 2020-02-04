@@ -803,12 +803,52 @@ class editor
 
     loadFile(fname)
     {
+        $.ajax({
+            type: "POST",
+            url: '/mehd/loadProgram.php',
+            data: { programName:fname },
+            dataType: "xml",
+            success: function(data)
+            {
+                var xmlDoc = $.parseXML(data);
+                var $xml = $( xmlDoc );
+                alert($xml);        
+            }
+        });
         
+        return "Program loaded.";
     }
 
     saveFile(fname)
     {
+        var text="";
+        this.lineArray.forEach(element => text+=element+'\n');
 
+        $.ajax({
+            type: "POST",
+            url: '/mehd/saveProgram.php',
+            data: { progName:fname, progText:text },
+            dataType: "xml",
+            success: function(data)
+            {
+                var xmlDoc = $.parseXML(data);
+                var $xml = $( xmlDoc );
+        
+                $xml.find("results").each(function() 
+                {
+                    var rez=$(this).find("result").text();
+                    if (rez=="OK")
+                    {
+                    }
+                    else
+                    {
+                        var err=$(this).find("message").text();
+                    }
+                });
+            }
+        });
+
+        return "Saving.";
     }
 
     copyCurrentSelection()

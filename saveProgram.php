@@ -24,34 +24,12 @@ header ("Content-Type:text/xml");
 
 /* */
 
-mysql_connect("localhost", "kcrupxyn_data", "mos6581sid");
-mysql_select_db("kcrupxyn_basicdata");
+$proggieName=$_POST["progName"];
+$proggieText=$_POST["progText"];
 
-/* */
+$fp = fopen('savedir/' . $proggieName, 'w');
+fwrite($fp, $proggieText);
+fclose($fp);
 
-//$linenum="10";
-//$line="10 print \"ciao\"";
-//$progid=1;
-//$deleteAll="Y";
-
-$linenum=$_POST["lineNum"];
-$line=$_POST["lineText"];
-$progid=$_POST["progId"];
-$deleteAll=$_POST["deleteAll"];
-
-if ($deleteAll=="Y")
-{
-	$sql="delete from program_lines where program_id=".$progid;
-	mysql_query($sql);
-}
-
-$sql="INSERT INTO program_lines(program_id,linenum,linetext) VALUES (".$progid.",".$linenum.",'".mysql_escape_string($line)."')";
-if ($result = mysql_query($sql))
-{
-	returnXML("OK","inserted");
-}
-else
-{
-	returnXML("KO",mysql_error());
-}
+returnXML("OK","Program saved.");
 ?>
