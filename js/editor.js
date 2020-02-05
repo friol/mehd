@@ -43,6 +43,7 @@ class editor
         this.editorMode=0; // 0 - inserting text, 1 - command mode
         this.commandList=[]; // list of commands for the command mode
         this.commandPointer=0;
+        this.lastFileSaved="";
 
         this.copyBuffer="";
         this.dragging=false;
@@ -678,6 +679,11 @@ class editor
             this.commandPointer=this.commandList.length-1;
             return "Running.";
         }
+        else if (cmd=="stop")
+        {
+            this.theLuaEngine.stop();
+            return "Stopping";
+        }
         else if (cmd.split(" ")[0]=="theme")
         {
             if (cmd.split(" ").length!=2)
@@ -759,11 +765,19 @@ class editor
             this.commandPointer=this.commandList.length-1;
             return "Switched to small screen mode.";
         }
-        else if (cmd.split(" ")[0]=="save")
+        else if ((cmd.split(" ")[0]=="save")||(cmd.split(" ")[0]=="s"))
         {
-            if (cmd.split(" ").length!=2)
+            if (cmd.split(" ").length==1)
             {
-                return "No filename specified.";
+                // no filename specified - saving the last file
+                if (this.lastFileSaved!="")
+                {
+                    return this.saveFile(this.lastFileSaved);
+                }
+                else
+                {
+                    return "No filename specified.";
+                }
             }
 
             var quotedFname=cmd.split(" ")[1];
@@ -773,6 +787,7 @@ class editor
             }
 
             quotedFname=quotedFname.replace(/\"/g,"");
+            this.lastFileSaved=quotedFname;
 
             return this.saveFile(quotedFname);
         }

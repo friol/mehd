@@ -3,7 +3,7 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* save&load somewhere
+* stop execution
 * logic expressions
 * avoid flickering
 * undo for string paste
@@ -14,6 +14,8 @@ TODO
 
 DONE
 
+* add to tables
+* save&load functionality
 * command history in status bar
 * poor man's syntax highlighter - strings - numbers - =, >=, etc.
 * tab inserts tab

@@ -12,6 +12,7 @@ class luaengine
         this.totCycles=0;
         this.numInstructionsPerInterval=32;
 
+        this.status=0; // 0 stopped, 1 running
         this.executionStartTime=0;
         this.executionEndTime=0;
 
@@ -69,12 +70,19 @@ class luaengine
             this.globalScope={};
     
             this.executionStartTime=performance.now();
+            this.status=1;
+
             this.execute();
         }
         catch(e)
         {
             alert("Syntax error: ["+e.toString()+"]");
         }
+    }
+
+    stop()
+    {
+        this.status=0;
     }
 
     evaluateExpression(e)
@@ -132,6 +140,10 @@ class luaengine
                 {
                     return ['NUMBER',this.localScope[variableName]];
                 }
+                else if (Array.isArray(this.globalScope[variableName]))
+                {
+                    return ['ARRAY',variableName];
+                }
             }
             else if (variableName in this.globalScope)
             {
@@ -142,6 +154,10 @@ class luaengine
                 else if (typeof this.globalScope[variableName]=='number')
                 {
                     return ['NUMBER',this.globalScope[variableName]];
+                }
+                else if (Array.isArray(this.globalScope[variableName]))
+                {
+                    return ['ARRAY',variableName];
                 }
             }
         }
@@ -516,6 +532,25 @@ class luaengine
                 objres.result=atanRes;
             }
         }
+        else if (fname=="add")
+        {
+            if (arglist.length!=2)
+            {
+                return [1,"add requires two arguments."];
+            }
+
+            var tableName=arglist[0][1];
+            var valueToAdd=arglist[1][1];
+
+            if (tableName in this.globalScope)
+            {
+                this.globalScope[tableName].push(valueToAdd);
+            }
+            else if (tableName in this.localScope)
+            {
+                this.localScope[tableName].push(valueToAdd);
+            }            
+        }
         else
         {
             // try to find function in custom functions
@@ -587,6 +622,8 @@ class luaengine
 
     execute()
     {
+        if (this.status==0) return;
+        
         // format: [[blocktype,instrBlockPointer,instructionPC,forend,forstride,forvariable],...]
         var iType=this.pcStack[this.level][0];
         var cycfrom,cycto,cycstride,startingVal;
