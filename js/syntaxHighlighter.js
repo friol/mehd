@@ -29,6 +29,7 @@ class syntaxHighlighter
             " line","line ","line",
             " rectfill","rectfill ","rectfill",
             " circfill","circfill ","circfill",
+            " pset","pset",
             " color","color ","color",
             " flip","flip ","flip",
             " cls","cls ","cls", "add", "add",

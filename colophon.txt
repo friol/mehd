@@ -3,6 +3,8 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
+* enter after last line bugs
+* <= in if conditions doesn't work
 * stop if run after run
 * undo for string paste
 * properly handle multiline selections (copy multiline & paste)
