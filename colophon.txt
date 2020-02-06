@@ -3,17 +3,17 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* stop execution
-* logic expressions
-* avoid flickering
+* stop if run after run
 * undo for string paste
 * properly handle multiline selections (copy multiline & paste)
 * pixel-art right scrollbar with dynamic center widget
 * load an unzoomed font and zoom it via code
-* keyboard "chords" commands
+* logic expressions
+* avoid flickering
 
 DONE
 
+* stop execution
 * add to tables
 * save&load functionality
 * command history in status bar

@@ -31,7 +31,7 @@ class syntaxHighlighter
             " circfill","circfill ","circfill",
             " color","color ","color",
             " flip","flip ","flip",
-            " cls","cls ","cls",
+            " cls","cls ","cls", "add", "add",
             " rnd","rnd"," flr","flr", " abs","abs",
             " max","max"," bxor","bxor"," min","min",
             " sqrt","sqrt", " atan2","atan2",
