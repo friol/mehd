@@ -1063,14 +1063,13 @@ class editor
                     this.docTopline+=1;
                 }
 
-
                 if (this.cursorx==0)
                 {
-                    this.lineArray.splice(this.cursory-1,0,"");
+                    this.lineArray.splice(this.cursory-1+this.docTopline,0,"");
                 }
                 else if (this.cursorx==this.lineArray[this.cursory-1+this.docTopline].length)
                 {
-                    this.lineArray.splice(this.cursory,0,"");
+                    this.lineArray.splice(this.cursory+this.docTopline,0,"");
                     this.cursorx=0;
                 }
                 else
