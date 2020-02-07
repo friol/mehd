@@ -70,9 +70,18 @@ class luaengine
             this.globalScope={};
     
             this.executionStartTime=performance.now();
-            this.status=1;
 
-            this.execute();
+            if (this.status==1)
+            {
+                // already running
+                this.status=0;
+                window.setTimeout(function(){ this.status=1; this.execute(); }, 500);
+            }
+            else
+            {
+                this.status=1;
+                this.execute();
+            }
         }
         catch(e)
         {

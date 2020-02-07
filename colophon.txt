@@ -3,7 +3,7 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* enter after last line bugs
+* row not correct when after bottom line
 * <= in if conditions doesn't work
 * stop if run after run
 * undo for string paste
