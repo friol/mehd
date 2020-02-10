@@ -1499,7 +1499,7 @@ class editor
             this.cursorTick=0;
         }
 
-        this.statusBar.updateCursor(this.cursory,this.cursorx,this.cursorTick,this.cursorSteps);
+        this.statusBar.updateCursor(this.cursory+this.docTopline,this.cursorx,this.cursorTick,this.cursorSteps);
         this.statusBar.update();
     }
 

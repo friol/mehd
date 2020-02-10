@@ -75,7 +75,7 @@ class luaengine
             {
                 // already running
                 this.status=0;
-                window.setTimeout(function(){ this.status=1; this.execute(); }, 500);
+                window.setTimeout(function(){ this.status=1; this.execute(); }, 1000);
             }
             else
             {

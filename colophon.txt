@@ -3,7 +3,6 @@ mehd <strikethrough>old</strikethrough> next gen editor
 
 TODO
 
-* row not correct when after bottom line
 * <= in if conditions doesn't work
 * stop if run after run
 * undo for string paste
@@ -12,9 +11,11 @@ TODO
 * load an unzoomed font and zoom it via code
 * logic expressions
 * avoid flickering
+* write a compiler to bytecode
 
 DONE
 
+* row not correct when after bottom line
 * stop execution
 * add to tables
 * save&load functionality
